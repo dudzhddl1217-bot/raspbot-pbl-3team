@@ -1,0 +1,12 @@
+# 비밀 · 개인 정보는 올리지 않는다
+.env
+*.env
+*wifi*.pdf
+*비밀번호*
+# 파이썬 · 편집기 찌꺼기
+__pycache__/
+*.pyc
+.vscode/
+.DS_Store
+# 드라이버 압축을 푼 임시 폴더 (홈에 생김, 혹시 몰라)
+py_install/
