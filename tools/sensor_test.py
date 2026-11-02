@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
+# 지시서: specs/02-sensor-check.md
 # 센서 점검 — 부저 · 불빛 · 초음파 거리 · 라인센서 · 카메라 사진 1장을 차례로 확인한다.
 # 사용법은 Yahboom 드라이버(Raspbot_Lib 0.0.2) 소스의 주석 예제를 따른다.
+import argparse
 import os
 import time
 
 from Raspbot_Lib import Raspbot
 
+parser = argparse.ArgumentParser(description="라즈봇 센서 점검")
+parser.add_argument("--step", action="store_true", help="각 단계 전에 엔터 입력 대기")
+parser.add_argument("--only", choices=("all", "buzzer", "ultrasonic", "line", "camera"),
+                    default="all", help="선택한 항목만 점검 (기본: 전체)")
+args = parser.parse_args()
 bot = Raspbot()
+
+
+def wait_for_step(message):
+    if args.step:
+        input(f"[준비] {message} — 엔터를 누르면 시작합니다: ")
 
 
 def read_byte(reg):
@@ -26,7 +38,7 @@ def check_buzzer_and_light():
 
 
 def check_ultrasonic(times=6):
-    print("[2/4] 초음파 거리: 라즈봇 앞에 손을 가까이 댔다 멀리 했다 해 보세요")
+    print("[2/4] 초음파 거리: 미리 안내받은 손 위치를 유지하거나 움직이며 확인해 주세요")
     bot.Ctrl_Ulatist_Switch(1)
     time.sleep(1)
     for _ in range(times):
@@ -81,10 +93,16 @@ def check_camera(path=os.path.join(RESULTS, "camera_test.jpg")):
 
 
 try:
-    check_buzzer_and_light()
-    check_ultrasonic()
-    check_line_sensor()
-    check_camera()
+    checks = (
+        ("buzzer", "부저와 불빛 색 순서를 봐 주세요", check_buzzer_and_light),
+        ("ultrasonic", "초음파: 안내받은 손 위치와 거리 숫자를 확인해 주세요", check_ultrasonic),
+        ("line", "라인센서: 흰 종이 위에서 검은 테이프를 차체 아래 네 칸에 한 칸씩 대 주세요", check_line_sensor),
+        ("camera", "카메라 앞을 비워 주세요", check_camera),
+    )
+    for name, message, check in checks:
+        if args.only in ("all", name):
+            wait_for_step(message)
+            check()
     print("[OK] 센서 점검 끝")
 finally:
     bot.Ctrl_WQ2812_ALL(0, 0)
