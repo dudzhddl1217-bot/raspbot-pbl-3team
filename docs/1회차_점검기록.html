@@ -58,6 +58,15 @@ ul.plain{padding-left:18px;margin:0}
 ul.plain li{margin:3px 0}
 footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
 a{color:inherit}
+@media print{
+  .wrap{max-width:none;padding-block:0}
+  .two{grid-template-columns:1fr}
+  .tw{overflow:visible}
+  table{font-size:12.5px}
+  .case,.verdict,figure,tr{break-inside:avoid}
+  h2{break-after:avoid}
+  figure img{max-width:520px}
+}
 </style>
 
 <div class="wrap">
