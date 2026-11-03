@@ -28,6 +28,17 @@ class FakeBot:
         self.commands.append((number, speed))
 
 
+class Clock:
+    def __init__(self):
+        self.now = 0.0
+
+    def monotonic(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.now = round(self.now + seconds, 9)
+
+
 class LineTests(unittest.TestCase):
     def test_all_patterns_and_hold(self):
         expected = {
@@ -75,15 +86,15 @@ class LineTests(unittest.TestCase):
         keys = iter((False,False,True))
         with patch.object(line.time, 'sleep'):
             line.follow(bot, lambda: next(keys))
-        self.assertEqual(bot.commands[-4:], list(enumerate(line.STOP)))
+        self.assertEqual(bot.commands[-12:], list(enumerate(line.STOP)) * 3)
         bad = FakeBot(data=None)
         with self.assertRaises(RuntimeError):
             line.follow(bad, lambda: False)
-        self.assertEqual(bad.commands, list(enumerate(line.STOP)))
+        self.assertEqual(bad.commands, list(enumerate(line.STOP)) * 3)
         interrupted = FakeBot()
         with self.assertRaises(KeyboardInterrupt):
             line.follow(interrupted, lambda: (_ for _ in ()).throw(KeyboardInterrupt()))
-        self.assertEqual(interrupted.commands, list(enumerate(line.STOP)))
+        self.assertEqual(interrupted.commands, list(enumerate(line.STOP)) * 3)
 
     def test_stop_attempts_all_four_after_exception(self):
         bot = FakeBot()
@@ -94,7 +105,53 @@ class LineTests(unittest.TestCase):
         bot.Ctrl_Muto = motor
         with self.assertRaises(RuntimeError):
             line.stop_all(bot)
-        self.assertEqual(bot.commands, list(enumerate(line.STOP)))
+        self.assertEqual(bot.commands, list(enumerate(line.STOP)) * 3)
+
+    def test_stop_timing_and_repeat_count(self):
+        bot = FakeBot()
+        clock = Clock()
+        events = []
+        def motor(number, speed):
+            events.append((clock.now,number,speed))
+        bot.Ctrl_Muto = motor
+        with patch.object(line.time,'monotonic',clock.monotonic), \
+             patch.object(line.time,'sleep',clock.sleep):
+            line.stop_all(bot)
+        self.assertEqual(len(events),12)
+        for repeat in range(3):
+            batch=events[repeat*4:(repeat+1)*4]
+            self.assertEqual([e[1:] for e in batch],[(n,0) for n in range(4)])
+            for number,event in enumerate(batch):
+                self.assertAlmostEqual(event[0],repeat*.2+number*.01,places=6)
+
+    def test_line_loss_exit_also_repeats_stop(self):
+        bot = FakeBot(data=(15,))
+        clock = Clock()
+        with patch.object(line.time,'monotonic',clock.monotonic), \
+             patch.object(line.time,'sleep',clock.sleep):
+            line.follow(bot,lambda:False)
+        # 줄 놓침 판단에서 정지 한 묶음, 종료 정리에서 정지 세 묶음.
+        self.assertEqual(bot.commands,list(enumerate(line.STOP))*4)
+
+    def test_silently_ignored_stop_is_recovered(self):
+        bot=FakeBot()
+        clock=Clock()
+        actual=[50,50,50,50]
+        dropped=False
+        def motor(number,speed):
+            nonlocal dropped
+            bot.commands.append((number,speed))
+            if number==3 and not dropped:
+                dropped=True
+                return
+            actual[number]=speed
+        bot.Ctrl_Muto=motor
+        with patch.object(line.time,'monotonic',clock.monotonic), \
+             patch.object(line.time,'sleep',clock.sleep):
+            line.stop_all(bot)
+        self.assertTrue(dropped)
+        self.assertEqual(actual,[0,0,0,0])
+        self.assertEqual(len(bot.commands),12)
 
     def test_read_only_mode_sends_no_motor_commands(self):
         bot = FakeBot()

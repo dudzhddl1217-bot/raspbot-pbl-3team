@@ -13,6 +13,9 @@ import tty
 # 읽은 x1,x2,x3,x4를 왼쪽부터 재배열한다. 2026-11-03 개별 센서 실측 확인.
 SENSOR_ORDER = (1, 0, 2, 3)
 STOP = (0, 0, 0, 0)
+STOP_REPEATS = 3
+STOP_INTERVAL = 0.2
+STOP_MOTOR_GAP = 0.01
 
 
 def read_sensors(bot):
@@ -87,11 +90,17 @@ def drive(bot, speeds):
 
 def stop_all(bot):
     errors = []
-    for number in range(4):
-        try:
-            bot.Ctrl_Muto(number, 0)
-        except Exception as exc:
-            errors.append(exc)
+    for repeat in range(STOP_REPEATS):
+        sent_at = time.monotonic()
+        for number in range(4):
+            try:
+                bot.Ctrl_Muto(number, 0)
+            except Exception as exc:
+                errors.append(exc)
+            if number < 3:
+                time.sleep(STOP_MOTOR_GAP)
+        if repeat < STOP_REPEATS - 1:
+            time.sleep(max(0, sent_at + STOP_INTERVAL - time.monotonic()))
     if errors:
         raise RuntimeError("정지 명령 실패. 라즈봇 전원을 확인하세요.") from errors[0]
 
