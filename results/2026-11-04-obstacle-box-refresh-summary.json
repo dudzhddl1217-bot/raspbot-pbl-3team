@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-04",
+  "test": "바퀴 명령 재전송 수정본 상자 위 시험",
+  "rows": 938,
+  "stop_beep_events": 19,
+  "completed_command_cycles": 18,
+  "invalid_sample_rows": 17,
+  "invalid_streak_stop_events": 3,
+  "motor_batches_during_loop": 258,
+  "sample_interval_median_s": 0.0501,
+  "sample_interval_max_s": 0.0502,
+  "keyboard_stop": true,
+  "exit_code": 0,
+  "cleanup": "네 바퀴 정지·부저/초음파 끄기 3회 반복 명령 실행",
+  "physical_observation": "사용자 확인: 시험 중 네 바퀴가 함께 반응하고 종료 후 모두 정지. 초음파 앞 한쪽만 가려도 네 바퀴 전체 정지.",
+  "ruler_measurement": "상자 위 손 시험이므로 미측정. 바닥 성공 기준 판정 대기",
+  "result": "상자 위 실제 반응 정상. 기존 한쪽 회전 증상은 이번 재시험에서 재현되지 않음."
+}

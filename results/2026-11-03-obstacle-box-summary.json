@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-03",
+  "test": "상자 위 손 접근·제거 시험",
+  "rows": 1798,
+  "completed_command_cycles": 8,
+  "cycles": [
+    {
+      "stop_elapsed_s": 6.7573,
+      "stop_raw_cm": 13.6,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 9.4607,
+      "restart_raw_cm": 25.5,
+      "restart_median_cm": 25.5
+    },
+    {
+      "stop_elapsed_s": 12.765,
+      "stop_raw_cm": 13.6,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 17.0703,
+      "restart_raw_cm": 25.5,
+      "restart_median_cm": 25.5
+    },
+    {
+      "stop_elapsed_s": 19.173,
+      "stop_raw_cm": 13.6,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 29.0355,
+      "restart_raw_cm": 27.2,
+      "restart_median_cm": 25.5
+    },
+    {
+      "stop_elapsed_s": 35.6943,
+      "stop_raw_cm": 11.9,
+      "stop_median_cm": 11.9,
+      "restart_elapsed_s": 43.4043,
+      "restart_raw_cm": 28.9,
+      "restart_median_cm": 27.2
+    },
+    {
+      "stop_elapsed_s": 44.6559,
+      "stop_raw_cm": 11.9,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 60.4269,
+      "restart_raw_cm": 27.2,
+      "restart_median_cm": 25.5
+    },
+    {
+      "stop_elapsed_s": 66.1848,
+      "stop_raw_cm": 10.2,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 67.7366,
+      "restart_raw_cm": 45.9,
+      "restart_median_cm": 42.5
+    },
+    {
+      "stop_elapsed_s": 77.1986,
+      "stop_raw_cm": 13.6,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 84.6583,
+      "restart_raw_cm": 25.5,
+      "restart_median_cm": 25.5
+    },
+    {
+      "stop_elapsed_s": 86.6607,
+      "stop_raw_cm": 13.6,
+      "stop_median_cm": 13.6,
+      "restart_elapsed_s": 89.2139,
+      "restart_raw_cm": 61.2,
+      "restart_median_cm": 61.2
+    }
+  ],
+  "invalid_sample_rows": 0,
+  "sampling_interval_median_s": 0.0501,
+  "sampling_interval_max_s": 0.0502,
+  "exit": "키 입력으로 종료, 종료 코드 0. 네 바퀴·부저·초음파 정리 명령 실행",
+  "physical_observation": "사용자: 거리 변화에 바퀴가 반응하지만 한쪽 측면만 회전. 네 바퀴 정상 주행 판정 불가.",
+  "ruler_distance": "상자 위 손 시험이라 미측정. 바닥 상자 시험의 12~18cm 성공 여부 미판정",
+  "followup_stop": "네 바퀴 0·부저 및 초음파 끄기 재전송, I2C 오류 없음. 다른 주행 프로세스 없음. 실제 전체 정지 확인 대기.",
+  "result": "이상, 실물 시험 합격 보류"
+}
