@@ -7,6 +7,7 @@
 # 얼굴이 포함된 점검 사진은 로컬에만 둔다
 /results/yolo_test.jpg
 /results/2026-11-03-video-preview.jpg
+/results/signs_images/
 
 # 영상은 크니까 레포에 올리지 않는다 (공유는 드라이브 · 단톡으로)
 results/videos/
