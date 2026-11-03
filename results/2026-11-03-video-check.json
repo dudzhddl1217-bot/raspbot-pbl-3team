@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-03",
+  "ten_second_test": {
+    "path": "/home/pi/raspbot/results/videos/blackbox_20261103_175737_358214_442bc601.mp4",
+    "size_bytes": 453831,
+    "duration_seconds": 10.133333,
+    "frames": 152,
+    "fps": 15,
+    "stop_method": "SIGINT (Ctrl+C)",
+    "all_frames_decoded": true,
+    "timestamp_and_REC_verified": true
+  },
+  "rotation_test": {
+    "seconds": 20,
+    "segment_seconds": 5,
+    "keep": 3,
+    "total_frames_written": 300,
+    "repeated_frames": 8,
+    "remaining_files": [
+      {
+        "path": "/home/pi/raspbot/results/videos/rotation_test_20261103_1758/blackbox_20261103_175827_971694_8abcb131.mp4",
+        "size_bytes": 219061,
+        "codec_name": "h264",
+        "r_frame_rate": "15/1",
+        "duration": "5.000000",
+        "nb_frames": "75"
+      },
+      {
+        "path": "/home/pi/raspbot/results/videos/rotation_test_20261103_1758/blackbox_20261103_175832_924758_b05c4730.mp4",
+        "size_bytes": 147240,
+        "codec_name": "h264",
+        "r_frame_rate": "15/1",
+        "duration": "5.000000",
+        "nb_frames": "75"
+      },
+      {
+        "path": "/home/pi/raspbot/results/videos/rotation_test_20261103_1758/blackbox_20261103_175837_877852_5b19052d.mp4",
+        "size_bytes": 160682,
+        "codec_name": "h264",
+        "r_frame_rate": "15/1",
+        "duration": "5.000000",
+        "nb_frames": "75"
+      }
+    ]
+  },
+  "non_blackbox_files_preserved": true,
+  "snapshot_is_independent_copy": true,
+  "external_status_setter_validated": true
+}
