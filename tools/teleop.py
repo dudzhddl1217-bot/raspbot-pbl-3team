@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+# 지시서: specs/03-teleop-diagonal.md
 # 노트북 키보드로 라즈봇 조종하기 — VS Code 터미널(또는 SSH 창)에서 실행한다.
 #   w / s : 앞 / 뒤          a / d : 옆으로 왼쪽 / 오른쪽
 #   q / e : 제자리 회전       스페이스 : 정지
+#   7 / 9 : 앞-왼 / 앞-오 대각     1 / 3 : 뒤-왼 / 뒤-오 대각
 #   + / - : 속도 올리기 / 내리기     x : 끝내기
 # 키를 누르고 있는 동안 움직이고, 손을 떼면 잠시 뒤(AUTO_STOP 초) 저절로 멈춘다.
 import curses
@@ -17,6 +19,10 @@ MOVES = {
     "d": (1, -1, -1, 1),
     "q": (-1, -1, 1, 1),
     "e": (1, 1, -1, -1),
+    "7": (0, 1, 1, 0),
+    "9": (1, 0, 0, 1),
+    "1": (-1, 0, 0, -1),
+    "3": (0, -1, -1, 0),
 }
 SPEED_MIN, SPEED_MAX, SPEED_STEP = 40, 150, 20
 AUTO_STOP = 0.6  # 키 반복이 시작되기 전 공백(약 0.5초)보다 길게
@@ -42,6 +48,7 @@ def main(screen):
         screen.erase()
         screen.addstr(0, 0, "Raspbot teleop")
         screen.addstr(1, 0, "w/s fwd/back   a/d side   q/e turn   space stop   +/- speed   x quit")
+        screen.addstr(2, 0, "7/9 front-left/right diagonal   1/3 back-left/right diagonal")
         screen.addstr(3, 0, f"speed {speed:3d}   move {moving or 'stop'}")
         ch = screen.getch()
         now = time.monotonic()
