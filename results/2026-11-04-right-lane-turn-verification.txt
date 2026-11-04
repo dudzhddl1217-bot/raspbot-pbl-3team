@@ -4,19 +4,28 @@ test_finishrun_stops_on_start_or_timeout (__main__.ControllerTests.test_finishru
 test_frame_stale_and_lane_lost_stop (__main__.ControllerTests.test_frame_stale_and_lane_lost_stop) ... ok
 test_report_fields (__main__.ControllerTests.test_report_fields) ... ok
 test_rightlane_center_from_one_line (__main__.ControllerTests.test_rightlane_center_from_one_line) ... ok
+test_speed_difference_change_limited_every_frame (__main__.ControllerTests.test_speed_difference_change_limited_every_frame) ... ok
 test_turnright_arc_and_exit_on_wide_lines (__main__.ControllerTests.test_turnright_arc_and_exit_on_wide_lines) ... ok
 test_turnright_timeout_and_lost (__main__.ControllerTests.test_turnright_timeout_and_lost) ... ok
 test_waitlane_follows_07_then_switches (__main__.ControllerTests.test_waitlane_follows_07_then_switches) ... ok
 test_waitlane_width_from_right_line_or_stop_without_yellow (__main__.ControllerTests.test_waitlane_width_from_right_line_or_stop_without_yellow) ... ok
-test_append_run (__main__.LoopTests.test_append_run) ... /Users/jeong-yeongbin/raspbot-pbl-3team/tools/test_right_lane_turn.py:345: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/0k/lggypmw14sg6pw4w6c8gfw680000gn/T/tmp_wuk8wgc/runs.csv' mode='r' encoding='utf-8'>
+test_append_run (__main__.LoopTests.test_append_run) ... /Users/jeong-yeongbin/raspbot-pbl-3team/tools/test_right_lane_turn.py:422: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/0k/lggypmw14sg6pw4w6c8gfw680000gn/T/tmpote_mdj9/runs.csv' mode='r' encoding='utf-8'>
   rows = list(csv.DictReader(path.open(encoding='utf-8')))
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
-test_check_mode_sends_no_motor_commands (__main__.LoopTests.test_check_mode_sends_no_motor_commands) ... 차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [39, 39, 31, 31], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
+test_check_mode_keeps_observing_after_stop_condition (__main__.LoopTests.test_check_mode_keeps_observing_after_stop_condition) ... 차선 계산: {"left": null, "right": null, "left_count": 0, "right_count": 0, "divider": null, "white": 0.0, "right_width": null, "full_width": null, "width": null, "center": null, "speeds": [0, 0, 0, 0], "state": "WAITLINES", "stopped": false, "reason": "", "notes": []}
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
 ok
-test_drive_mode_reaches_finish_and_stops (__main__.LoopTests.test_drive_mode_reaches_finish_and_stops) ... 차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [39, 39, 31, 31], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
-차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": 224.0, "full_width": 454.0, "width": 224.0, "center": 444.5, "speeds": [80, 80, 0, 0], "state": "RIGHTLANE", "stopped": false, "reason": "", "notes": []}
-차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": null, "white": 0.0, "right_width": 224.0, "full_width": 454.0, "width": 224.0, "center": 444.5, "speeds": [80, 80, 0, 0], "state": "TURNRIGHT", "stopped": false, "reason": "", "notes": []}
+test_check_mode_sends_no_motor_commands (__main__.LoopTests.test_check_mode_sends_no_motor_commands) ... 차선 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
+ok
+test_drive_mode_reaches_finish_and_stops (__main__.LoopTests.test_drive_mode_reaches_finish_and_stops) ... 차선 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
+차선 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "divider": 332.5, "white": 0.0028, "right_width": 224.0, "full_width": 454.0, "width": 224.0, "center": 444.5, "speeds": [72, 72, 0, 0], "state": "RIGHTLANE", "stopped": false, "reason": "", "notes": []}
+차선 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "divider": null, "white": 0.0, "right_width": 224.0, "full_width": 454.0, "width": 454.0, "center": 329.5, "speeds": [66, 66, 4, 4], "state": "FINISHRUN", "stopped": false, "reason": "", "notes": []}
+ok
+test_drive_mode_stops_when_no_lines_at_start (__main__.LoopTests.test_drive_mode_stops_when_no_lines_at_start) ... 차선 계산: {"left": null, "right": null, "left_count": 0, "right_count": 0, "divider": null, "white": 0.0, "right_width": null, "full_width": null, "width": null, "center": null, "speeds": [0, 0, 0, 0], "state": "WAITLINES", "stopped": false, "reason": "", "notes": []}
 ok
 test_analyze_and_annotated (__main__.VisionTests.test_analyze_and_annotated) ... ok
 test_arrow_blobs_rejected (__main__.VisionTests.test_arrow_blobs_rejected) ... ok
@@ -28,6 +37,6 @@ test_white_island_and_start_marks_rejected (__main__.VisionTests.test_white_isla
 test_yellow_fringe_is_not_white (__main__.VisionTests.test_yellow_fringe_is_not_white) ... ok
 
 ----------------------------------------------------------------------
-Ran 21 tests in 3.911s
+Ran 24 tests in 4.865s
 
 OK

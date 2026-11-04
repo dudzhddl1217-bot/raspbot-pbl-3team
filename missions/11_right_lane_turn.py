@@ -53,6 +53,7 @@ WIDE_RATIO = 1.4                                         # 두 선 폭이 오른
 START_WHITE = 0.25                                       # START 무늬 판단 흰 비율
 FINISH_MAX = 8.0                                         # FINISHRUN 최대 시간
 FRAME_STALE = 0.5                                        # 07과 같은 화면 갱신 중단 한계
+START_GRACE = 3.0                                        # 시작 뒤 노란 선을 처음 볼 때까지 정지 대기(카메라 노출 안정)
 
 
 # ---------- 카메라가 보는 것 ----------
@@ -113,8 +114,9 @@ def floor_white_ratio(frame, lines):
     return float(_masks(frame[FLOOR_TOP:FLOOR_BOTTOM])[:, lo:hi].mean())
 
 
-def analyze(frame):
-    lines = lane.find_lines(frame)
+def analyze(frame, previous=None, width=None, last_name=None):
+    """07과 같은 방식으로 선 이름을 이어 가며(직전 위치·한쪽 선 이름) 선·흰 실선·흰 비율을 계산한다."""
+    lines = lane.find_lines(frame, previous, width, last_name)
     divider = find_divider(frame, lines)
     return lines, divider, floor_white_ratio(frame, lines)
 
@@ -125,7 +127,9 @@ class RightLaneController:
 
     def __init__(self):
         self.lane = lane.LaneController()
-        self.state = 'WAITLANE'
+        self.previous = None            # 07과 같은 선 이름 이어 가기용 직전 위치
+        self.single_name = None
+        self.state = 'WAITLINES'
         self.speeds = STOP
         self.stopped = False
         self.reason = ''
@@ -158,6 +162,15 @@ class RightLaneController:
             return STOP
         self.last_frame = now
         self.lines, self.divider, self.white = dict(lines), divider, white
+        left, right = lines['left'], lines['right']
+        if left is not None and right is not None:
+            self.previous = dict(left=left, right=right)
+        elif self.previous is not None:
+            for name in ('left', 'right'):
+                if lines[name] is not None:
+                    self.previous[name] = lines[name]
+        if (left is None) != (right is None):
+            self.single_name = 'left' if left is not None else 'right'
         if self.phase_since is None:
             self.phase_since = now
         if lines['left'] is not None or lines['right'] is not None or divider is not None:
@@ -167,10 +180,14 @@ class RightLaneController:
             self.divider_last = now
         else:
             self.divider_seen = 0
-        handler = {'WAITLANE': self._waitlane, 'RIGHTLANE': self._rightlane,
+        handler = {'WAITLINES': self._waitlines, 'WAITLANE': self._waitlane, 'RIGHTLANE': self._rightlane,
                    'TURNRIGHT': self._turnright, 'FINISHRUN': self._finishrun}[self.state]
         self.speeds = STOP if self.stopped else handler(lines, divider, white, now)
         return self.speeds
+
+    def _limited(self, target):
+        """07의 속도 차이 안정화: 새 화면마다 왼쪽−오른쪽 변화량을 최대 10으로 제한한다."""
+        return lane.limit_difference(target, self.speeds)
 
     def _enter(self, state, now):
         self.state = state
@@ -183,6 +200,17 @@ class RightLaneController:
         self.reason = reason
         self.stopped = True
         self.speeds = STOP
+        self.center = None
+        return STOP
+
+    def _waitlines(self, lines, divider, white, now):
+        """시작 직후: 노란 선(이름이 없어도)을 처음 볼 때까지 최대 3초 정지 대기. 07의 즉시 LOSTSTOP을 막는다."""
+        if lines['left'] is not None or lines['right'] is not None or lines.get('unassigned'):
+            self._enter('WAITLANE', now)
+            return self._waitlane(lines, divider, white, now)
+        if now - self.phase_since >= START_GRACE:
+            self.notes.append('NO_LINES_AT_START')
+            return self._stop('LOSTSTOP')
         self.center = None
         return STOP
 
@@ -221,7 +249,7 @@ class RightLaneController:
             return self._turnright(lines, divider, white, now)
         if self.center is None:
             return self.speeds                              # 잠깐 놓침: 직전 명령 유지
-        return lane.wheel_speeds(self.center)
+        return self._limited(lane.wheel_speeds(self.center))
 
     def _turnright(self, lines, divider, white, now):
         left, right = lines['left'], lines['right']
@@ -233,15 +261,18 @@ class RightLaneController:
                 self.notes.append('TURN_TIMEOUT')
             self.lane = lane.LaneController()                # 큰 길 폭을 다시 잰다
             self.lane.width = self.full_width                # 한쪽 선만 보여도 바로 갈 수 있게
+            self.lane.speeds = self.speeds                   # 속도 차이 제한이 단계 전환에서도 이어지게
+            self.lane.previous = None if self.previous is None else dict(self.previous)
+            self.lane.single_name = self.single_name
             self._enter('FINISHRUN', now)
             return self._finishrun(lines, divider, white, now)
         if self.lines_last is None or now - self.lines_last > TURN_LOST_MAX:
             return self._stop('LOSTSTOP')
         if right is not None:
             self.center = right - self.right_width / 2
-            return lane.wheel_speeds(self.center)
+            return self._limited(lane.wheel_speeds(self.center))
         self.center = None
-        return TURN_ARC
+        return self._limited(TURN_ARC)
 
     def _finishrun(self, lines, divider, white, now):
         speeds = self.lane.update(lines, now)
@@ -317,7 +348,8 @@ def run_loop(camera, recorder, display, key_pressed, stream, check=False, bot=No
             candidate, new_sequence = camera.snapshot()
             received_at = time.monotonic()
             if new_sequence != sequence:
-                lines, divider, white = analyze(candidate)
+                lines, divider, white = analyze(candidate, controller.previous, controller.lane.width,
+                                                controller.single_name)
                 controller.update(lines, divider['divider'], white, received_at)
                 frame, sequence = candidate, new_sequence
             if key_pressed():
@@ -341,8 +373,12 @@ def run_loop(camera, recorder, display, key_pressed, stream, check=False, bot=No
                 print('차선 계산: ' + json.dumps(report, ensure_ascii=False), flush=True)
                 next_print = now + 1
             if controller.stopped:
-                reason = report['state']
-                break
+                if not check:
+                    reason = report['state']
+                    break
+                print(f'읽기 전용: 정지 조건 {report["state"]} (기록 {controller.notes}) → 새로 판단을 시작해 계속 관찰합니다.', flush=True)
+                controller = RightLaneController()
+                last_record = None
             time.sleep(.01)
     except KeyboardInterrupt:
         reason = 'Ctrl+C'
@@ -394,7 +430,7 @@ def append_run(path, trial, reason, elapsed, raw, paths, notes):
 
 def main():
     parser = argparse.ArgumentParser(description='두 차선 길 오른쪽 차선 → 우회전 → START 정지 / --check는 모터 명령 없음')
-    parser.add_argument('--check', action='store_true', help='모터 없이 선·흰 실선·흰 비율·단계·바퀴 계산 값을 1초마다 출력')
+    parser.add_argument('--check', action='store_true', help='모터 없이 선·흰 실선·흰 비율·단계·바퀴 계산 값을 1초마다 출력 (정지 조건이 와도 계속 관찰)')
     parser.add_argument('--trial', default='', help='runs.csv에 남길 회차 이름 (주행 모드)')
     args = parser.parse_args()
     camera = recorder = bot = None
