@@ -59,9 +59,9 @@ class ObstacleController:
             return 0, False
         self.filtered_cm = float(median(self.samples))
         was_moving = self.moving
-        if self.moving and self.filtered_cm <= 15:
+        if self.moving and self.filtered_cm <= 25:
             self.moving = False
-        elif not self.moving and self.filtered_cm >= 25:
+        elif not self.moving and self.filtered_cm >= 35:
             self.moving = True
         self.status = "전진" if self.moving else "거리 조건 정지"
         return (50 if self.moving else 0), was_moving and not self.moving

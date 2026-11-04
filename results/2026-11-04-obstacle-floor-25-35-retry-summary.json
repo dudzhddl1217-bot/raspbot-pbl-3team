@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-04",
+  "trial": "2-재시험1",
+  "speed": 50,
+  "stop_cm": 25,
+  "restart_cm": 35,
+  "ruler_cm": 18,
+  "raw_at_stop_cm": 22.1,
+  "median_at_stop_cm": 22.1,
+  "restart_raw_cm": 161.5,
+  "restart_median_cm": 78.2,
+  "cycle_confirmed": true,
+  "distance_in_range": true,
+  "post_exit_all_wheels_stopped_confirmed": true,
+  "elapsed_s_including_observation": 164.2646,
+  "exit_code": 0,
+  "raw_log": "results/obstacle_floor_20261104_25_35_02_retry01.csv",
+  "original_ruler_cm": 19,
+  "original_result_preserved": true,
+  "note": "최초5회 동작5/5·거리4/5 집계는 유지, 이후 재시험1회는 동작·거리 모두 충족."
+}

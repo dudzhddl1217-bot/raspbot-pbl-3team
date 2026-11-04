@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-04",
+  "speed": 50,
+  "stop_cm": 25,
+  "restart_cm": 35,
+  "physical_target_cm": 15,
+  "allowed_cm": [
+    12,
+    18
+  ],
+  "trials": [
+    {
+      "trial": 1,
+      "ruler_cm": 17.0,
+      "raw_at_stop_cm": 22.1,
+      "median_at_stop_cm": 23.8,
+      "cycle_confirmed": true,
+      "distance_in_range": true,
+      "cycle_and_distance_ok": true,
+      "raw_log": "results/obstacle_floor_20261104_25_35_01.csv",
+      "post_exit_stop_confirmation": "종료 키 전 정지 사용자 확인; 종료 후 추가 확인 대기"
+    },
+    {
+      "trial": 2,
+      "ruler_cm": 19.0,
+      "raw_at_stop_cm": 23.8,
+      "median_at_stop_cm": 23.8,
+      "cycle_confirmed": true,
+      "distance_in_range": false,
+      "cycle_and_distance_ok": false,
+      "raw_log": "results/obstacle_floor_20261104_25_35_02.csv",
+      "post_exit_stop_confirmation": "종료 키 전 정지 사용자 확인; 종료 후 추가 확인 대기"
+    },
+    {
+      "trial": 3,
+      "ruler_cm": 18.0,
+      "raw_at_stop_cm": 23.8,
+      "median_at_stop_cm": 23.8,
+      "cycle_confirmed": true,
+      "distance_in_range": true,
+      "cycle_and_distance_ok": true,
+      "raw_log": "results/obstacle_floor_20261104_25_35_03.csv",
+      "post_exit_stop_confirmation": "예(사용자)"
+    },
+    {
+      "trial": 4,
+      "ruler_cm": 16.0,
+      "raw_at_stop_cm": 22.1,
+      "median_at_stop_cm": 23.8,
+      "cycle_confirmed": true,
+      "distance_in_range": true,
+      "cycle_and_distance_ok": true,
+      "raw_log": "results/obstacle_floor_20261104_25_35_04.csv",
+      "post_exit_stop_confirmation": "종료 키 전 정지 사용자 확인; 종료 후 추가 확인 대기"
+    },
+    {
+      "trial": 5,
+      "ruler_cm": 17.0,
+      "raw_at_stop_cm": 23.8,
+      "median_at_stop_cm": 23.8,
+      "cycle_confirmed": true,
+      "distance_in_range": true,
+      "cycle_and_distance_ok": true,
+      "raw_log": "results/obstacle_floor_20261104_25_35_05.csv",
+      "post_exit_stop_confirmation": "예(사용자)"
+    }
+  ],
+  "cycles_confirmed": 5,
+  "distance_ok_count": 4,
+  "cycle_and_distance_ok_count": 4,
+  "required_successes": 4,
+  "last_program_exit_code": 0,
+  "final_all_wheels_stopped_user_confirmation": "예(사용자)",
+  "note": "이전 규칙 1회차 제외. 2회차 실제 거리19cm는 허용 범위 밖. 원시 거리 로그의 시간은 사용자 관찰 대기 포함. 손댄 횟수는 미확인."
+}

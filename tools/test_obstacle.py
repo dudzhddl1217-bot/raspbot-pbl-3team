@@ -56,43 +56,43 @@ class FakeBot:
 class ObstacleTests(unittest.TestCase):
     def moving_controller(self):
         c = obstacle.ObstacleController()
-        for value in (30,30,30):
+        for value in (40,40,40):
             c.update(value)
         self.assertTrue(c.moving)
         return c
 
     def test_wait_for_three_valid_samples(self):
         c = obstacle.ObstacleController()
-        for value in (30, 0, 30, 401):
+        for value in (40, 0, 40, 401):
             self.assertEqual(c.update(value), (0,False))
-        self.assertEqual(c.update(30), (50,False))
+        self.assertEqual(c.update(40), (50,False))
 
     def test_median_rejects_single_low_and_high_outlier(self):
         c = self.moving_controller()
         self.assertEqual(c.update(1), (50,False))
-        self.assertEqual(c.filtered_cm, 30)
+        self.assertEqual(c.filtered_cm, 40)
         c = obstacle.ObstacleController()
-        for value in (14, 15, 200):
+        for value in (24, 25, 200):
             c.update(value)
-        self.assertEqual(c.filtered_cm, 15)
+        self.assertEqual(c.filtered_cm, 25)
         self.assertFalse(c.moving)
 
     def test_stop_restart_boundaries_and_single_beep(self):
         c = self.moving_controller()
-        self.assertEqual(c.update(15), (50,False))
-        self.assertEqual(c.update(15), (0,True))
-        self.assertEqual(c.update(15), (0,False))
-        for _ in range(3):
-            self.assertEqual(c.update(24.9), (0,False))
-        self.assertEqual(c.update(25), (0,False))
         self.assertEqual(c.update(25), (50,False))
+        self.assertEqual(c.update(25), (0,True))
+        self.assertEqual(c.update(25), (0,False))
         for _ in range(3):
-            self.assertEqual(c.update(15.1), (50,False))
+            self.assertEqual(c.update(34.9), (0,False))
+        self.assertEqual(c.update(35), (0,False))
+        self.assertEqual(c.update(35), (50,False))
+        for _ in range(3):
+            self.assertEqual(c.update(25.1), (50,False))
 
     def test_initial_middle_distance_stays_stopped(self):
         c = obstacle.ObstacleController()
         for _ in range(3):
-            self.assertEqual(c.update(20), (0,False))
+            self.assertEqual(c.update(30), (0,False))
 
     def test_three_invalid_values_stop_and_clear_history(self):
         c = self.moving_controller()
@@ -100,29 +100,29 @@ class ObstacleTests(unittest.TestCase):
         self.assertEqual(c.update(401), (50,False))
         self.assertEqual(c.update(0), (0,False))
         self.assertEqual(list(c.samples), [])
-        self.assertEqual(c.update(30), (0,False))
-        self.assertEqual(c.update(30), (0,False))
-        self.assertEqual(c.update(30), (50,False))
+        self.assertEqual(c.update(40), (0,False))
+        self.assertEqual(c.update(40), (0,False))
+        self.assertEqual(c.update(40), (50,False))
 
     def test_invalid_streak_resets_on_valid_sample(self):
         c = self.moving_controller()
-        for value in (0,0,30,401,401,30):
+        for value in (0,0,40,401,401,40):
             self.assertEqual(c.update(value), (50,False))
         self.assertEqual(c.invalid_count, 0)
 
-    def test_recovery_does_not_restart_below_25(self):
+    def test_recovery_does_not_restart_below_35(self):
         c = self.moving_controller()
         for _ in range(3): c.update(0)
-        for _ in range(3): self.assertEqual(c.update(20), (0,False))
-        for _ in range(3): c.update(30)
+        for _ in range(3): self.assertEqual(c.update(30), (0,False))
+        for _ in range(3): c.update(35)
         self.assertTrue(c.moving)
 
     def test_invalid_during_recovery_is_not_used(self):
         c = self.moving_controller()
         for _ in range(3): c.update(0)
-        for value in (30, 401, 30, 0):
+        for value in (40, 401, 40, 0):
             self.assertEqual(c.update(value), (0,False))
-        self.assertEqual(c.update(30), (50,False))
+        self.assertEqual(c.update(40), (50,False))
 
     def test_invalid_ranges_and_400_included(self):
         for value in (0, -1, 400.1, None, float('nan'), float('inf'), True, '30'):
@@ -130,7 +130,7 @@ class ObstacleTests(unittest.TestCase):
                 c = self.moving_controller()
                 c.update(value)
                 self.assertEqual(c.invalid_count, 1)
-                self.assertEqual(list(c.samples), [30,30,30])
+                self.assertEqual(list(c.samples), [40,40,40])
         c = obstacle.ObstacleController()
         for _ in range(3): c.update(400)
         self.assertTrue(c.moving)
@@ -143,7 +143,7 @@ class ObstacleTests(unittest.TestCase):
 
     def test_schedule_beep_duration_log_and_cleanup(self):
         clock = Clock()
-        bot = FakeBot([300,300,300,140,140,300,300] + [300]*40, clock)
+        bot = FakeBot([400,400,400,250,250,350,350] + [400]*40, clock)
         stream = io.StringIO()
         with patch.object(obstacle.time,'monotonic',clock.monotonic), \
              patch.object(obstacle.time,'sleep',clock.sleep), redirect_stdout(io.StringIO()):
@@ -212,13 +212,13 @@ class ObstacleTests(unittest.TestCase):
         self.assertEqual([e[0] for e in bot.events], [0,.01,.02,.03])
 
     def test_periodic_resend_for_unchanged_forward_and_stop(self):
-        for distance in (300,100):
+        for distance in (400,100):
             clock = Clock()
             bot = FakeBot([distance]*100,clock)
             with patch.object(obstacle.time,'monotonic',clock.monotonic), \
                  patch.object(obstacle.time,'sleep',clock.sleep), redirect_stdout(io.StringIO()):
                 obstacle.run_obstacle(bot,lambda:clock.now>=1.9,io.StringIO())
-            target = 50 if distance==300 else 0
+            target = 50 if distance==400 else 0
             starts = [e[0] for e in bot.events
                       if e[1:]==('motor',0,target) and 1.1<=e[0]<1.9]
             self.assertGreaterEqual(len(starts),3)
@@ -227,7 +227,7 @@ class ObstacleTests(unittest.TestCase):
 
     def test_speed_change_does_not_wait_for_refresh(self):
         clock=Clock()
-        bot=FakeBot([300,300,300,140,140]+[140]*100,clock)
+        bot=FakeBot([400,400,400,250,250]+[250]*100,clock)
         stream=io.StringIO()
         with patch.object(obstacle.time,'monotonic',clock.monotonic), \
              patch.object(obstacle.time,'sleep',clock.sleep), redirect_stdout(io.StringIO()):
@@ -261,7 +261,7 @@ class ObstacleTests(unittest.TestCase):
 
     def test_silent_command_loss_is_recovered_by_resend(self):
         clock=Clock()
-        bot=FakeBot([300]*100,clock)
+        bot=FakeBot([400]*100,clock)
         original=bot.Ctrl_Muto
         applied=[0,0,0,0]
         states=[]

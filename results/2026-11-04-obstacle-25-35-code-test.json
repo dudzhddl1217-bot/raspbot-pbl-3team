@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-04",
+  "command": "python3 tools/test_obstacle.py",
+  "result": "OK",
+  "tests_passed": 20,
+  "stop_median_cm": 25,
+  "restart_median_cm": 35,
+  "speed": 50,
+  "physical_target_cm": 15,
+  "physical_allowed_cm": [
+    12,
+    18
+  ],
+  "reason": "사용자 관찰: 속도 50에서 제동 거리 약 10cm. 이전 1회차는 정지 명령 중앙값 13.6cm, 실제 정지 거리 약 1cm.",
+  "checked": [
+    "25cm 이하 정지·부저 한 번",
+    "35cm 이상 재출발",
+    "25cm 초과·35cm 미만 상태 유지",
+    "오류 복구 후 35cm 미만 재출발 방지",
+    "정상값 3개 대기·중앙값·0.05초 주기",
+    "0.2초 부저·키 정지·예외 정리",
+    "0.2초 재전송·0.01초 바퀴 간격·종료 정지 3회"
+  ],
+  "old_trial_label": "규칙 바꾸기 전",
+  "old_trial_raw_csv": "results/obstacle_floor_20261104_01.csv",
+  "old_trial_raw_sha256": "7605e3ef4c30835850f177e4375ae97803575f3ebb745212784fa08da245b6b7",
+  "next_trial": 1,
+  "next_trial_raw_csv": "results/obstacle_floor_20261104_25_35_01.csv",
+  "hardware_used": false
+}
