@@ -29,12 +29,17 @@ line = load('camera_lane_stop', '02_line.py')
 video = load('camera_lane_blackbox', '03_video.py')
 STOP = (0, 0, 0, 0)
 KST = ZoneInfo('Asia/Seoul')
+ROI_TOP, ROI_BOTTOM = 120, 300
+BASE_SPEED = 35
+STEERING_K = 0.4
+MAX_SPEED = 80
+SEARCH_SECONDS = 1.0
 
 
 def find_lines(frame):
     if frame is None or frame.shape != (480, 640, 3) or frame.dtype != np.uint8:
         raise ValueError('차선 입력 화면은 640x480 uint8 BGR이어야 합니다.')
-    hsv = cv2.cvtColor(frame[120:220], cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(frame[ROI_TOP:ROI_BOTTOM], cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, (15, 80, 100), (40, 255, 255))
     result = {}
     for name, start, end in (('left', 0, 320), ('right', 320, 640)):
@@ -44,6 +49,13 @@ def find_lines(frame):
     return result
 
 
+def wheel_speeds(center):
+    correction = STEERING_K * (center - 320)
+    left = max(0, min(MAX_SPEED, round(BASE_SPEED + correction)))
+    right = max(0, min(MAX_SPEED, round(BASE_SPEED - correction)))
+    return (left, left, right, right)
+
+
 class LaneController:
     """장치 없이 선 위치·시간으로 바퀴 값을 계산한다."""
     def __init__(self):
@@ -51,6 +63,7 @@ class LaneController:
         self.center = None
         self.last_frame = None
         self.lost_since = None
+        self.last_turn = None
         self.speeds = STOP
         self.stopped = False
         self.state = 'WAITFRAME'
@@ -62,7 +75,7 @@ class LaneController:
         if self.last_frame is not None and now - self.last_frame > 0.5:
             self.state = 'FRAMESTOP'
             self.stopped = True
-        elif self.lost_since is not None and now - self.lost_since > 0.5:
+        elif self.lost_since is not None and now - self.lost_since >= SEARCH_SECONDS:
             self.state = 'LOSTSTOP'
             self.stopped = True
         if self.stopped:
@@ -80,7 +93,13 @@ class LaneController:
             if self.lost_since is None:
                 self.lost_since = now
             self.center = None
-            self.state = 'LOSTGRACE'
+            if self.last_turn is None:
+                self.state = 'LOSTSTOP'
+                self.stopped = True
+                self.speeds = STOP
+            else:
+                self.state = 'SEARCH' + self.last_turn
+                self.speeds = (60, 60, 0, 0) if self.last_turn == 'RIGHT' else (0, 0, 60, 60)
             return self.speeds
         self.lost_since = None
         if left is not None and right is not None:
@@ -98,34 +117,35 @@ class LaneController:
         else:
             self.center = right - self.width / 2
             self.state = 'TRACKRIGHT'
-        correction = .2 * (self.center - 320)
-        lvalue = max(0, min(80, round(40 + correction)))
-        rvalue = max(0, min(80, round(40 - correction)))
-        self.speeds = (lvalue, lvalue, rvalue, rvalue)
+        self.speeds = wheel_speeds(self.center)
+        if self.speeds[0] > self.speeds[2]:
+            self.last_turn = 'RIGHT'
+        elif self.speeds[0] < self.speeds[2]:
+            self.last_turn = 'LEFT'
         return self.speeds
 
     def report(self):
         return dict(self.lines, width=self.width, center=self.center,
-                    speeds=self.speeds, state=self.state, stopped=self.stopped)
+                    speeds=self.speeds, state=self.state, stopped=self.stopped, last_turn=self.last_turn)
 
 
 def annotated(frame, report):
     out = frame.copy()
-    cv2.rectangle(out, (0, 120), (639, 219), (255, 255, 255), 1)
-    cv2.line(out, (320, 120), (320, 219), (255, 255, 255), 1)
+    cv2.rectangle(out, (0, ROI_TOP), (639, ROI_BOTTOM - 1), (255, 255, 255), 1)
+    cv2.line(out, (320, ROI_TOP), (320, ROI_BOTTOM - 1), (255, 255, 255), 1)
     for name in ('left', 'right'):
         position = report[name]
         if position is not None:
             x = round(position)
-            cv2.line(out, (x, 120), (x, 219), (0, 255, 255), 2)
+            cv2.line(out, (x, ROI_TOP), (x, ROI_BOTTOM - 1), (0, 255, 255), 2)
             cv2.putText(out, f'{name.upper()} {position:.1f}', (max(2,min(480,x)),112),
                         cv2.FONT_HERSHEY_SIMPLEX, .45, (0,255,255), 1, cv2.LINE_AA)
     if report['center'] is not None:
         x = round(report['center'])
-        cv2.line(out,(x,120),(x,219),(0,255,0),2)
+        cv2.line(out,(x,ROI_TOP),(x,ROI_BOTTOM - 1),(0,255,0),2)
     text = f"CENTER {report['center']} WIDTH {report['width']} WHEELS {report['speeds']}"
-    cv2.putText(out,text,(8,250),cv2.FONT_HERSHEY_SIMPLEX,.43,(255,255,255),1,cv2.LINE_AA)
-    cv2.putText(out,report['state'],(8,275),cv2.FONT_HERSHEY_SIMPLEX,.6,(255,255,255),1,cv2.LINE_AA)
+    cv2.putText(out,text,(8,330),cv2.FONT_HERSHEY_SIMPLEX,.43,(255,255,255),1,cv2.LINE_AA)
+    cv2.putText(out,report['state'],(8,355),cv2.FONT_HERSHEY_SIMPLEX,.6,(255,255,255),1,cv2.LINE_AA)
     return out
 
 

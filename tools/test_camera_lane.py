@@ -40,7 +40,7 @@ class FindTests(unittest.TestCase):
 
     def test_roi_rows_and_half_boundary(self):
         frame=image(None,None)
-        frame[119,:]=(0,255,255);frame[220,:]=(0,255,255)
+        frame[119,:]=(0,255,255);frame[300,:]=(0,255,255)
         self.assertEqual(m.find_lines(frame),lines())
         frame[120:220,319:321]=(0,255,255)
         result=m.find_lines(frame)
@@ -55,6 +55,13 @@ class FindTests(unittest.TestCase):
         frame[169,100]=(0,255,255)
         self.assertEqual(m.find_lines(frame)['left'],100.)
         self.assertEqual(m.find_lines(frame)['left_count'],50)
+
+    def test_extended_roi_detects_rows_below_old_band(self):
+        frame=image(None,None)
+        frame[220:300,150]=(0,255,255)
+        frame[220:300,490]=(0,255,255)
+        result=m.find_lines(frame)
+        self.assertEqual(result,dict(left=150.,right=490.,left_count=80,right_count=80))
 
     def test_hsv_thresholds_inclusive(self):
         cases=[((15,255,255),True),((40,255,255),True),((14,255,255),False),
@@ -88,9 +95,13 @@ class ControllerTests(unittest.TestCase):
     def setUp(self):self.c=m.LaneController()
 
     def test_straight_and_direction(self):
-        self.assertEqual(self.c.update(lines(160,480),0),(40,40,40,40))
-        self.assertEqual(self.c.update(lines(200,520),.1),(48,48,32,32))
-        self.assertEqual(self.c.update(lines(100,420),.2),(28,28,52,52))
+        self.assertEqual(self.c.update(lines(160,480),0),(35,35,35,35))
+        self.assertEqual(self.c.update(lines(200,520),.1),(51,51,19,19))
+        self.assertEqual(self.c.update(lines(100,420),.2),(11,11,59,59))
+
+    def test_corner_recalculation(self):
+        self.assertEqual(m.wheel_speeds(378),(58,58,12,12))
+        self.assertEqual(m.wheel_speeds(379.18628875968994),(59,59,11,11))
 
     def test_speed_limits_no_reverse(self):
         self.c.update(lines(0,639),0)
@@ -106,7 +117,7 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(self.c.state,'WAITWIDTH')
         self.assertIsNone(self.c.width)
         self.assertEqual(self.c.update(lines(None,480),.4),m.STOP)
-        self.assertEqual(self.c.update(lines(160,480),.5),(40,40,40,40))
+        self.assertEqual(self.c.update(lines(160,480),.5),(35,35,35,35))
 
     def test_width_updated_only_when_both_seen(self):
         self.c.update(lines(100,500),0)
@@ -119,42 +130,61 @@ class ControllerTests(unittest.TestCase):
         self.c.update(lines(200,400),.3)
         self.assertEqual(self.c.width,200)
 
-    def test_loss_grace_then_latched_stop(self):
+    def test_last_turn_search_until_one_second_then_latched_stop(self):
         self.c.update(lines(200,520),0)
-        last=self.c.speeds
-        self.assertEqual(self.c.update(lines(),.1),last)
-        self.assertEqual(self.c.update(lines(),.4),last)
-        self.assertEqual(self.c.tick(.6),last)
-        self.assertEqual(self.c.tick(.6001),m.STOP)
+        for now in (.1,.4,.7,1.0):
+            self.assertEqual(self.c.update(lines(),now),(60,60,0,0))
+            self.assertEqual(self.c.state,'SEARCHRIGHT')
+        self.assertEqual(self.c.tick(1.0999),(60,60,0,0))
+        self.assertEqual(self.c.tick(1.1),m.STOP)
         self.assertEqual(self.c.state,'LOSTSTOP')
-        self.assertEqual(self.c.update(lines(160,480),.61),m.STOP)
+        self.assertEqual(self.c.update(lines(160,480),1.11),m.STOP)
+
+    def test_left_search_and_straight_preserves_last_turn(self):
+        self.c.update(lines(100,420),0)
+        self.c.update(lines(160,480),.1)
+        self.assertEqual(self.c.last_turn,'LEFT')
+        self.assertEqual(self.c.update(lines(),.2),(0,0,60,60))
+        self.assertEqual(self.c.state,'SEARCHLEFT')
 
     def test_recovery_before_loss_deadline(self):
-        self.c.update(lines(160,480),0)
-        self.c.update(lines(),.1)
-        self.c.update(lines(180,None),.4)
-        self.assertFalse(self.c.stopped)
-        self.assertIsNone(self.c.lost_since)
-
-    def test_late_visible_frame_cannot_restart(self):
-        self.c.update(lines(160,480),0)
+        self.c.update(lines(200,520),0)
         self.c.update(lines(),.1)
         self.c.update(lines(),.4)
-        self.assertEqual(self.c.update(lines(160,480),.6001),m.STOP)
+        self.c.update(lines(180,None),.7)
+        self.assertFalse(self.c.stopped)
+        self.assertIsNone(self.c.lost_since)
+        self.assertEqual(self.c.state,'TRACKLEFT')
+
+    def test_late_visible_frame_cannot_restart(self):
+        self.c.update(lines(200,520),0)
+        for now in (.1,.4,.7,1.0):self.c.update(lines(),now)
+        self.assertEqual(self.c.update(lines(160,480),1.1001),m.STOP)
         self.assertTrue(self.c.stopped)
+
+    def test_camera_freeze_during_search_still_stops_at_half_second(self):
+        self.c.update(lines(200,520),0)
+        self.c.update(lines(),.1)
+        self.assertEqual(self.c.tick(.6001),m.STOP)
+        self.assertEqual(self.c.state,'FRAMESTOP')
 
     def test_frame_stale_boundary_and_no_restart(self):
         self.c.update(lines(160,480),0)
-        self.assertEqual(self.c.tick(.5),(40,40,40,40))
+        self.assertEqual(self.c.tick(.5),(35,35,35,35))
         self.assertEqual(self.c.tick(.5001),m.STOP)
         self.assertEqual(self.c.state,'FRAMESTOP')
         self.assertEqual(self.c.update(lines(160,480),.6),m.STOP)
 
-    def test_initial_blank_stops_after_half_second(self):
-        self.c.update(lines(),0)
-        self.c.update(lines(),.3)
-        self.assertEqual(self.c.tick(.51),m.STOP)
+    def test_no_previous_turn_stops_immediately(self):
+        self.assertEqual(self.c.update(lines(),0),m.STOP)
         self.assertTrue(self.c.stopped)
+        self.assertEqual(self.c.state,'LOSTSTOP')
+        self.assertEqual(self.c.update(lines(160,480),.1),m.STOP)
+        straight=m.LaneController()
+        straight.update(lines(160,480),0)
+        self.assertIsNone(straight.last_turn)
+        self.assertEqual(straight.update(lines(),.1),m.STOP)
+        self.assertTrue(straight.stopped)
 
     def test_overlay_copy_and_fields(self):
         frame=image();original=frame.copy()
