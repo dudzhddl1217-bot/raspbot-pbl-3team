@@ -37,10 +37,10 @@ KST = ZoneInfo("Asia/Seoul")
 FIELDS = ("사진번호", "정답", "거리_cm", "각도", "인식이름", "점수", "맞힘", "원본사진", "결과사진")
 
 
-def make_detector():
+def make_detector(size=320):
     # 기존 Detector와 NMS는 '초과' 비교다. float32 한 칸 아래로 열고 아래에서 >=0.4를 적용한다.
     threshold = float(np.nextafter(np.float32(CONFIDENCE), np.float32(0)))
-    return Detector(size=320, conf=threshold)
+    return Detector(size=size, conf=threshold)
 
 
 def accepted(found):
@@ -184,10 +184,10 @@ class ResultVideo:
         self.check()
 
 
-def write_table(path, rows):
+def write_table(path, rows, fields=FIELDS):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with Path(path).open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=FIELDS, lineterminator="\n")
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -262,9 +262,99 @@ def collect_photos(camera, worker, video, photo_dir, table_path, input_fn=input)
     return assess(rows)
 
 
+def rescore(source, size):
+    """기존 원본 사진만 재채점한다. 카메라·모터에 접근하지 않는다."""
+    source = Path(source).resolve()
+    if source.is_dir():
+        source = ROOT / "results" / f"signs_{source.name}.csv"
+    with source.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    if len(rows) != 30:
+        raise ValueError("재채점에는 메타정보 입력을 마친 30장 CSV가 필요합니다.")
+    if any(row.get("모델", "yolo26n_320") != "yolo26n_320" for row in rows):
+        raise ValueError("비교 기준에는 원래 320 모델로 채점한 CSV를 지정해 주세요.")
+    photos = []
+    for row in rows:
+        row["사진번호"] = int(row["사진번호"])
+        row["거리_cm"] = int(row["거리_cm"])
+        row["맞힘"] = int(row["맞힘"])
+        if (row["정답"] not in TARGETS or row["거리_cm"] not in QUOTAS
+                or row["각도"] not in ANGLES or row["맞힘"] not in (0, 1)):
+            raise ValueError("원본 CSV의 정답·거리·각도·맞힘 값을 확인해 주세요.")
+        path = (ROOT / row["원본사진"]).resolve()
+        if not path.is_relative_to(PHOTO_ROOT.resolve()) or not path.name.endswith("_raw.jpg"):
+            raise ValueError("signs_images 안의 원본 사진(_raw.jpg)만 재채점할 수 있습니다.")
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        photos.append(path)
+    if len({r["사진번호"] for r in rows}) != 30 or len(set(photos)) != 30:
+        raise ValueError("사진번호와 원본 사진은 30장 모두 달라야 합니다.")
+    baseline = assess(rows)
+    detector = make_detector(size)
+    session = (source.stem + f"_rescore_{size}_"
+               + datetime.now(KST).strftime("%Y%m%d_%H%M%S_%f") + "_" + uuid4().hex[:6])
+    photo_dir = PHOTO_ROOT / session
+    table_path = ROOT / "results" / f"{session}.csv"
+    comparison_path = ROOT / "results" / f"{session}_comparison.csv"
+    summary_path = ROOT / "results" / f"{session}_summary.csv"
+    photo_dir.mkdir(parents=True, exist_ok=False)
+    rescored, comparison = [], []
+    note = "거리는 자로 잰 대략값"
+    new_fields = (*FIELDS, "모델", "거리측정", "원본CSV")
+    comparison_fields = ("사진번호", "정답", "거리_cm", "각도", "원본사진", "거리측정",
+                         "320_인식이름", "320_점수", "320_맞힘", "재채점모델",
+                         "재채점_인식이름", "재채점_점수", "재채점_맞힘", "재채점_결과사진")
+    for row, raw_path in zip(rows, photos):
+        frame = cv2.imread(str(raw_path))
+        if frame is None:
+            raise RuntimeError(f"원본 사진을 읽지 못했습니다: {raw_path}")
+        found = accepted(detector(frame))
+        marked_path = photo_dir / f"photo_{row['사진번호']:02d}_result.jpg"
+        if not cv2.imwrite(str(marked_path), annotated(frame, found)):
+            raise RuntimeError(f"결과 사진 저장 실패: {marked_path}")
+        new = {field: row[field] for field in FIELDS}
+        new.update(인식이름=";".join(name for name, _, _ in found),
+                   점수=";".join(f"{score:.6f}" for _, score, _ in found),
+                   맞힘=int(any(name == row["정답"] for name, _, _ in found)),
+                   결과사진=str(marked_path.relative_to(ROOT)),
+                   모델=f"yolo26n_{size}", 거리측정=note, 원본CSV=str(source))
+        rescored.append(new)
+        paired = {key: row[key] for key in comparison_fields[:5]}
+        paired.update(거리측정=note, 재채점모델=f"yolo26n_{size}")
+        for field in ("인식이름", "점수", "맞힘"):
+            paired[f"320_{field}"] = row[field]
+            paired[f"재채점_{field}"] = new[field]
+        paired["재채점_결과사진"] = new["결과사진"]
+        comparison.append(paired)
+        write_table(table_path, rescored, new_fields)
+        write_table(comparison_path, comparison, comparison_fields)
+        print(f"재채점 {len(rescored)}/30: {new['정답']} {'맞힘' if new['맞힘'] else '못 맞힘'}", flush=True)
+    result = assess(rescored)
+    summary_fields = ("모델", *TARGETS, "전체맞힘", "전체장수", "촬영조건충족", "통과", "거리측정", "원본CSV")
+    summary_rows = []
+    for model, assessment in (("yolo26n_320 (원래 결과)", baseline), (f"yolo26n_{size} (저장 사진 재채점)", result)):
+        summary_rows.append({"모델": model, **assessment["by_class"],
+                             "전체맞힘": assessment["correct"], "전체장수": assessment["complete"],
+                             "촬영조건충족": assessment["plan_ok"], "통과": assessment["passed"],
+                             "거리측정": note, "원본CSV": str(source)})
+    write_table(summary_path, summary_rows, summary_fields)
+    print(f"320: {baseline['correct']}/30 → {size}: {result['correct']}/30\n"
+          f"종류별: {result['by_class']}\n촬영 조건: {result['plan_ok']}, 통과: {result['passed']}\n"
+          f"{note}\n새 기록표: {table_path}\n사진별 비교: {comparison_path}\n합계 비교: {summary_path}", flush=True)
+    return {"baseline": baseline, "result": result, "table": table_path,
+            "comparison": comparison_path, "summary": summary_path, "photo_dir": photo_dir}
+
+
 def main():
     parser = argparse.ArgumentParser(description="인쇄 표지 30장 촬영·YOLO 인식 시험, 바퀴는 움직이지 않음")
-    parser.parse_args()
+    parser.add_argument("--rescore", type=Path, help="기존 사진 폴더 또는 CSV로 재촬영 없이 채점")
+    parser.add_argument("--size", type=int, choices=(320, 640), default=320, help="이미 있는 모델 크기 (기본 320)")
+    args = parser.parse_args()
+    if args.rescore is not None:
+        rescore(args.rescore, args.size)
+        return
+    if args.size != 320:
+        parser.error("640 모델 비교는 --rescore로 기존 30장을 지정해 주세요.")
     session = datetime.now(KST).strftime("%Y%m%d_%H%M%S_%f") + "_" + uuid4().hex[:6]
     photo_dir = PHOTO_ROOT / session
     table_path = ROOT / "results" / f"signs_{session}.csv"

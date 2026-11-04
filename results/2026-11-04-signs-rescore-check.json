@@ -1,0 +1,41 @@
+{
+  "original_files_unchanged": 66,
+  "rescored_photos": 30,
+  "scores": [
+    {
+      "모델": "yolo26n_320 (원래 결과)",
+      "stop sign": "4",
+      "person": "7",
+      "car": "7",
+      "전체맞힘": "18",
+      "전체장수": "30",
+      "촬영조건충족": "True",
+      "통과": "False",
+      "거리측정": "거리는 자로 잰 대략값",
+      "원본CSV": "/home/pi/raspbot/results/signs_20261104_093555_889782_bb01fa.csv"
+    },
+    {
+      "모델": "yolo26n_640 (저장 사진 재채점)",
+      "stop sign": "8",
+      "person": "8",
+      "car": "10",
+      "전체맞힘": "26",
+      "전체장수": "30",
+      "촬영조건충족": "True",
+      "통과": "True",
+      "거리측정": "거리는 자로 잰 대략값",
+      "원본CSV": "/home/pi/raspbot/results/signs_20261104_093555_889782_bb01fa.csv"
+    }
+  ],
+  "deleted": [
+    "results/signs_20261104_093238_268155_520db0.csv",
+    "results/signs_images/20261104_093238_268155_520db0",
+    "results/videos/signs_20261104_093238_268155_520db0.mp4",
+    "results/signs_20261104_093438_514393_36490b.csv",
+    "results/signs_images/20261104_093438_514393_36490b",
+    "results/videos/signs_20261104_093438_514393_36490b.mp4"
+  ],
+  "tests_passed": 16,
+  "camera_opened": false,
+  "wheels_moved": false
+}

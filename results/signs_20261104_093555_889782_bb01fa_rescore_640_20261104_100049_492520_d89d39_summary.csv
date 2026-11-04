@@ -1,0 +1,3 @@
+모델,stop sign,person,car,전체맞힘,전체장수,촬영조건충족,통과,거리측정,원본CSV
+yolo26n_320 (원래 결과),4,7,7,18,30,True,False,거리는 자로 잰 대략값,/home/pi/raspbot/results/signs_20261104_093555_889782_bb01fa.csv
+yolo26n_640 (저장 사진 재채점),8,8,10,26,30,True,True,거리는 자로 잰 대략값,/home/pi/raspbot/results/signs_20261104_093555_889782_bb01fa.csv

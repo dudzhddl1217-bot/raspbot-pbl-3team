@@ -215,6 +215,67 @@ class SignsTests(unittest.TestCase):
             signs.main()
         self.assertEqual(closed,['영상','인식','카메라'])
 
+    def test_rescore_saved_photos_preserves_inputs_and_pairs_results(self):
+        signs.PHOTO_ROOT.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=signs.PHOTO_ROOT) as tmp:
+            photo_dir = Path(tmp)
+            source = photo_dir / 'original.csv'
+            rows = plan_rows(18)
+            for i, row in enumerate(rows, 1):
+                raw = photo_dir / f'photo_{i:02d}_raw.jpg'
+                old_result = photo_dir / f'photo_{i:02d}_result.jpg'
+                signs.cv2.imwrite(str(raw), np.full((64, 64, 3), i, np.uint8))
+                old_result.write_bytes(b'original result')
+                row.update(사진번호=i, 인식이름='', 점수='',
+                           원본사진=str(raw.relative_to(signs.ROOT)),
+                           결과사진=str(old_result.relative_to(signs.ROOT)))
+            signs.write_table(source, rows)
+            original_bytes = {p: p.read_bytes() for p in photo_dir.iterdir()}
+
+            def detector(frame):
+                i = int(frame[0, 0, 0])
+                return [(rows[i - 1]['정답'], .4, (2, 2, 40, 40))]
+
+            with patch.object(signs, 'make_detector', return_value=detector) as factory, \
+                 patch.object(signs, 'LatestCamera', side_effect=AssertionError('camera opened')), \
+                 patch.object(signs, 'ResultVideo', side_effect=AssertionError('video opened')), \
+                 redirect_stdout(io.StringIO()):
+                output = signs.rescore(source, 640)
+            self.addCleanup(output['table'].unlink)
+            self.addCleanup(output['comparison'].unlink)
+            self.addCleanup(output['summary'].unlink)
+            import shutil
+            self.addCleanup(shutil.rmtree, output['photo_dir'])
+            factory.assert_called_once_with(640)
+            self.assertEqual(output['baseline']['correct'], 18)
+            self.assertEqual(output['result']['correct'], 30)
+            self.assertTrue(output['result']['passed'])
+            for path, content in original_bytes.items():
+                self.assertEqual(path.read_bytes(), content)
+            with output['comparison'].open() as stream:
+                paired = list(csv.DictReader(stream))
+            self.assertEqual(len(paired), 30)
+            self.assertEqual(sum(int(r['320_맞힘']) for r in paired), 18)
+            self.assertEqual(sum(int(r['재채점_맞힘']) for r in paired), 30)
+            self.assertTrue(all(r['거리측정'] == '거리는 자로 잰 대략값' for r in paired))
+            self.assertEqual(len(list(output['photo_dir'].glob('*_result.jpg'))), 30)
+
+    def test_rescore_incomplete_source_rejected_before_model_load(self):
+        with tempfile.TemporaryDirectory(dir=signs.PHOTO_ROOT) as tmp:
+            source = Path(tmp) / 'incomplete.csv'
+            signs.write_table(source, [])
+            with patch.object(signs, 'make_detector') as factory:
+                with self.assertRaises(ValueError):
+                    signs.rescore(source, 640)
+            factory.assert_not_called()
+
+    def test_rescore_cli_returns_before_camera_construction(self):
+        with patch.object(signs, 'rescore') as run, \
+             patch.object(signs, 'LatestCamera', side_effect=AssertionError('camera opened')), \
+             patch.object(signs.sys, 'argv', ['05_signs.py', '--rescore', 'results/signs_images/example', '--size', '640']):
+            signs.main()
+        run.assert_called_once_with(Path('results/signs_images/example'), 640)
+
 
 if __name__=='__main__':
     unittest.main()
