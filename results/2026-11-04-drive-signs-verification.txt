@@ -1,0 +1,36 @@
+test_existing_turn_speeds (__main__.ControllerTests.test_existing_turn_speeds) ... ok
+test_filter_inclusive_score_and_height (__main__.ControllerTests.test_filter_inclusive_score_and_height) ... ok
+test_initial_result_and_stale_boundary (__main__.ControllerTests.test_initial_result_and_stale_boundary) ... ok
+test_line_search_paused_and_direction_retained (__main__.ControllerTests.test_line_search_paused_and_direction_retained) ... ok
+test_no_last_turn_stops_on_resume_without_line (__main__.ControllerTests.test_no_last_turn_stops_on_resume_without_line) ... ok
+test_nonconsecutive_detection_resets (__main__.ControllerTests.test_nonconsecutive_detection_resets) ... ok
+test_persistent_stop_not_retriggered (__main__.ControllerTests.test_persistent_stop_not_retriggered) ... ok
+test_person_does_not_pause_existing_cooldown (__main__.ControllerTests.test_person_does_not_pause_existing_cooldown) ... ok
+test_person_priority_stop_clock_continues (__main__.ControllerTests.test_person_priority_stop_clock_continues) ... ok
+test_person_reappears_resets_absence (__main__.ControllerTests.test_person_reappears_resets_absence) ... ok
+test_person_release_needs_new_absent_results (__main__.ControllerTests.test_person_release_needs_new_absent_results) ... ok
+test_same_result_does_not_confirm (__main__.ControllerTests.test_same_result_does_not_confirm) ... ok
+test_short_stop_absence_not_rearm (__main__.ControllerTests.test_short_stop_absence_not_rearm) ... ok
+test_stale_does_not_count_as_absence (__main__.ControllerTests.test_stale_does_not_count_as_absence) ... ok
+test_stale_resets_two_result_confirmation (__main__.ControllerTests.test_stale_resets_two_result_confirmation) ... ok
+test_stop_absence_one_second_and_five_second_cooldown (__main__.ControllerTests.test_stop_absence_one_second_and_five_second_cooldown) ... ok
+test_stop_three_seconds_and_send_timestamp (__main__.ControllerTests.test_stop_three_seconds_and_send_timestamp) ... ok
+test_loop_stop_on_key_error_interrupt (__main__.IntegrationTests.test_loop_stop_on_key_error_interrupt) ... 상태 FORWARD, 센서 (0, 1, 0, 1), 바퀴 (50, 50, 50, 50)
+ok
+test_loop_waits_for_vision_and_logs_height (__main__.IntegrationTests.test_loop_waits_for_vision_and_logs_height) ... 상태 WAITVISION, 센서 (0, 1, 0, 1), 바퀴 (0, 0, 0, 0)
+상태 FORWARD, 센서 (0, 1, 0, 1), 바퀴 (50, 50, 50, 50)
+상태 PERSONWAIT, 센서 (0, 1, 0, 1), 바퀴 (0, 0, 0, 0)
+ok
+test_main_start_failure_and_loop_error_close_all (__main__.IntegrationTests.test_main_start_failure_and_loop_error_close_all) ... 종료: 오류: 가짜 열기 오류, 기록: /tmp/tmpq_hh7xc2/results/drive_signs_20261104_133041_435301_9a26e6.csv. 실제 완주·정지는 사용자 확인이 필요합니다.
+종료: 오류: 가짜 주행 오류, 기록: /tmp/tmpyd0e0zu1/results/drive_signs_20261104_133041_437170_d9f18c.csv. 실제 완주·정지는 사용자 확인이 필요합니다.
+종료: 키 입력, 기록: /tmp/tmpxzaravur/results/drive_signs_20261104_133041_439759_5ebf63.csv. 실제 완주·정지는 사용자 확인이 필요합니다.
+ok
+test_runs_csv_preserves_existing_fields_and_unknown_observations (__main__.IntegrationTests.test_runs_csv_preserves_existing_fields_and_unknown_observations) ... ok
+test_video_repeats_15fps_and_releases (__main__.IntegrationTests.test_video_repeats_15fps_and_releases) ... ok
+test_worker_model640_and_error_propagation (__main__.IntegrationTests.test_worker_model640_and_error_propagation) ... ok
+test_worker_uses_thread_and_only_new_camera_sequence (__main__.IntegrationTests.test_worker_uses_thread_and_only_new_camera_sequence) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.058s
+
+OK
