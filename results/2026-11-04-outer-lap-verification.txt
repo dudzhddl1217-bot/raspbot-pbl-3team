@@ -1,0 +1,41 @@
+test_armed_after_four_corners_then_finish_or_timeout (__main__.ControllerTests.test_armed_after_four_corners_then_finish_or_timeout) ... ok
+test_corner_counting_window_and_cooldown (__main__.ControllerTests.test_corner_counting_window_and_cooldown) ... ok
+test_follow_left_line_with_default_or_measured_width (__main__.ControllerTests.test_follow_left_line_with_default_or_measured_width) ... ok
+test_frame_stale_stops (__main__.ControllerTests.test_frame_stale_stops) ... ok
+test_lost_hold_then_stop_without_turn_history (__main__.ControllerTests.test_lost_hold_then_stop_without_turn_history) ... ok
+test_lost_search_in_last_turn_direction_then_stop (__main__.ControllerTests.test_lost_search_in_last_turn_direction_then_stop) ... ok
+test_report_fields (__main__.ControllerTests.test_report_fields) ... ok
+test_speed_difference_change_limited (__main__.ControllerTests.test_speed_difference_change_limited) ... ok
+test_start_marks_before_arming_are_ignored (__main__.ControllerTests.test_start_marks_before_arming_are_ignored) ... ok
+test_waitlines_grace (__main__.ControllerTests.test_waitlines_grace) ... ok
+test_zone_factor_slow_fast_and_hold (__main__.ControllerTests.test_zone_factor_slow_fast_and_hold) ... ok
+test_beep_and_append_run (__main__.LoopTests.test_beep_and_append_run) ... /Users/jeong-yeongbin/raspbot-pbl-3team/tools/test_outer_lap.py:384: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/0k/lggypmw14sg6pw4w6c8gfw680000gn/T/tmpuodsf0x6/runs.csv' mode='r' encoding='utf-8'>
+  rows = list(csv.DictReader(path.open(encoding='utf-8')))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_check_mode_sends_no_motor_commands_and_keeps_observing (__main__.LoopTests.test_check_mode_sends_no_motor_commands_and_keeps_observing) ... 한 바퀴 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "left_bottom": 102.5, "right_bottom": 556.5, "width": 454.0, "width_measured": true, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "LAP", "mode": "TRACKBOTH", "stopped": false, "reason": "", "corners": 0, "turn_sum": 0, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+읽기 전용: 정지 조건 LOSTSTOP (기록 []) → 새로 판단을 시작해 계속 관찰합니다.
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
+읽기 전용: 정지 조건 LOSTSTOP (기록 ['NO_LINES_AT_START']) → 새로 판단을 시작해 계속 관찰합니다.
+ok
+test_drive_mode_corners_then_finish_at_start_marks (__main__.LoopTests.test_drive_mode_corners_then_finish_at_start_marks) ... 한 바퀴 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "left_bottom": 102.5, "right_bottom": 556.5, "width": 454.0, "width_measured": true, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "LAP", "mode": "TRACKBOTH", "stopped": false, "reason": "", "corners": 0, "turn_sum": 0, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+한 바퀴 계산: {"left": 302.5, "right": null, "left_count": 1080, "right_count": 0, "left_bottom": 302.5, "right_bottom": null, "named_by": "12", "width": 454.0, "width_measured": true, "center": 529.5, "speeds": [80, 80, 0, 0], "state": "LAP", "mode": "TRACKLEFT", "stopped": false, "reason": "", "corners": 1, "turn_sum": 35.57, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+한 바퀴 계산: {"left": 302.5, "right": null, "left_count": 1080, "right_count": 0, "left_bottom": 302.5, "right_bottom": null, "named_by": "12", "width": 454.0, "width_measured": true, "center": 529.5, "speeds": [80, 80, 0, 0], "state": "LAP", "mode": "TRACKLEFT", "stopped": false, "reason": "", "corners": 3, "turn_sum": 35.85, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+한 바퀴 계산: {"left": 302.5, "right": null, "left_count": 1080, "right_count": 0, "left_bottom": 302.5, "right_bottom": null, "named_by": "12", "width": 454.0, "width_measured": true, "center": 529.5, "speeds": [80, 80, 0, 0], "state": "ARMED", "mode": "TRACKLEFT", "stopped": false, "reason": "", "corners": 5, "turn_sum": 34.23, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+ok
+test_key_press_stops_with_three_zero_bundles (__main__.LoopTests.test_key_press_stops_with_three_zero_bundles) ... 한 바퀴 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "left_bottom": 102.5, "right_bottom": 556.5, "width": 454.0, "width_measured": true, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "LAP", "mode": "TRACKBOTH", "stopped": false, "reason": "", "corners": 0, "turn_sum": 0, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+ok
+test_zone_lights_only_on_change (__main__.LoopTests.test_zone_lights_only_on_change) ... 한 바퀴 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "left_bottom": 102.5, "right_bottom": 556.5, "width": 454.0, "width_measured": true, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "LAP", "mode": "TRACKBOTH", "stopped": false, "reason": "", "corners": 0, "turn_sum": 0, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+한 바퀴 계산: {"left": 102.5, "right": 556.5, "left_count": 1080, "right_count": 1080, "left_bottom": 102.5, "right_bottom": 556.5, "width": 454.0, "width_measured": true, "center": 329.5, "speeds": [38, 38, 32, 32], "state": "LAP", "mode": "TRACKBOTH", "stopped": false, "reason": "", "corners": 0, "turn_sum": 6.62, "white": 0.0, "white_center": 0.0, "red": 0.0, "blue": 0.0, "zone": null, "factor": 1.0, "last_turn": "RIGHT", "notes": []}
+ok
+test_annotated (__main__.VisionTests.test_annotated) ... ok
+test_blue_red_zones_and_white_marks_ignored (__main__.VisionTests.test_blue_red_zones_and_white_marks_ignored) ... ok
+test_junction_island_fragment_does_not_steal_left (__main__.VisionTests.test_junction_island_fragment_does_not_steal_left) ... ok
+test_single_line_named_by_position_or_continuity (__main__.VisionTests.test_single_line_named_by_position_or_continuity) ... ok
+test_start_floor_ratio (__main__.VisionTests.test_start_floor_ratio) ... ok
+test_two_lines_and_bottom_x (__main__.VisionTests.test_two_lines_and_bottom_x) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 8.096s
+
+OK
