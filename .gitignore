@@ -17,3 +17,5 @@ results/videos/
 __pycache__/
 *.pyc
 .vscode/
+
+/results/camera_lane_test_images/

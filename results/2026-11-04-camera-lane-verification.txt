@@ -1,0 +1,31 @@
+test_frame_stale_boundary_and_no_restart (__main__.ControllerTests.test_frame_stale_boundary_and_no_restart) ... ok
+test_initial_blank_stops_after_half_second (__main__.ControllerTests.test_initial_blank_stops_after_half_second) ... ok
+test_initial_one_line_waits_without_guess (__main__.ControllerTests.test_initial_one_line_waits_without_guess) ... ok
+test_late_visible_frame_cannot_restart (__main__.ControllerTests.test_late_visible_frame_cannot_restart) ... ok
+test_loss_grace_then_latched_stop (__main__.ControllerTests.test_loss_grace_then_latched_stop) ... ok
+test_overlay_copy_and_fields (__main__.ControllerTests.test_overlay_copy_and_fields) ... ok
+test_recovery_before_loss_deadline (__main__.ControllerTests.test_recovery_before_loss_deadline) ... ok
+test_speed_limits_no_reverse (__main__.ControllerTests.test_speed_limits_no_reverse) ... ok
+test_straight_and_direction (__main__.ControllerTests.test_straight_and_direction) ... ok
+test_width_updated_only_when_both_seen (__main__.ControllerTests.test_width_updated_only_when_both_seen) ... ok
+test_center_width_and_means (__main__.FindTests.test_center_width_and_means) ... ok
+test_hsv_thresholds_inclusive (__main__.FindTests.test_hsv_thresholds_inclusive) ... ok
+test_invalid_image_rejected (__main__.FindTests.test_invalid_image_rejected) ... ok
+test_minimum_fifty_pixels (__main__.FindTests.test_minimum_fifty_pixels) ... ok
+test_roi_rows_and_half_boundary (__main__.FindTests.test_roi_rows_and_half_boundary) ... ok
+test_saved_fixture_detected (__main__.FindTests.test_saved_fixture_detected) ... ok
+test_check_main_has_no_driver_import_even_error (__main__.LoopTests.test_check_main_has_no_driver_import_even_error) ... ok
+test_check_never_calls_motors_on_all_exits (__main__.LoopTests.test_check_never_calls_motors_on_all_exits) ... ok
+test_check_prints_once_a_second (__main__.LoopTests.test_check_prints_once_a_second) ... ok
+test_driving_all_exits_repeat_stop (__main__.LoopTests.test_driving_all_exits_repeat_stop) ... ok
+test_frozen_frames_do_not_refresh_timeout (__main__.LoopTests.test_frozen_frames_do_not_refresh_timeout) ... ok
+test_main_check_success_closes_without_driver (__main__.LoopTests.test_main_check_success_closes_without_driver) ... 종료: 키 입력, 기록: /tmp/tmp5_c3r7bq/results/camera_lane_20261104_162130_651483.csv
+ok
+test_slow_processing_does_not_make_old_frame_fresh (__main__.LoopTests.test_slow_processing_does_not_make_old_frame_fresh) ... 차선 계산: {"left": 160, "right": 480, "left_count": 100, "right_count": 100, "width": 320, "center": 320.0, "speeds": [0, 0, 0, 0], "state": "FRAMESTOP", "stopped": true}
+ok
+test_video_fps_repeats_release (__main__.LoopTests.test_video_fps_repeats_release) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.326s
+
+OK

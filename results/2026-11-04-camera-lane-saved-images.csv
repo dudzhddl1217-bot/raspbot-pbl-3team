@@ -1,0 +1,9 @@
+사진,원본크기,검증입력크기,크기변환,왼쪽노란점개수,오른쪽노란점개수,왼쪽선_x,오른쪽선_x,차선폭_px,차선중심_x,바퀴값,상태,정답근거,원본변경없음
+results/camera_lane_test_images/both.png,640x480,640x480,False,100,100,160.0,480.0,320.0,320.0,"[40, 40, 40, 40]",TRACKBOTH,알려진 합성 선 위치,True
+results/camera_lane_test_images/left.png,640x480,640x480,False,100,0,160.0,,320.0,320.0,"[40, 40, 40, 40]",TRACKLEFT,알려진 합성 선 위치,True
+results/camera_lane_test_images/right.png,640x480,640x480,False,0,100,,480.0,320.0,320.0,"[40, 40, 40, 40]",TRACKRIGHT,알려진 합성 선 위치,True
+results/camera_lane_test_images/none.png,640x480,640x480,False,0,0,,,,,"[0, 0, 0, 0]",LOSTGRACE,알려진 합성 선 위치,True
+results/camera_test.jpg,1280x720,640x480,True,0,0,,,,,"[0, 0, 0, 0]",LOSTGRACE,정답 없는 기존 실제 사진; 검출 수치만 기록,True
+results/signs_images/20261104_093555_889782_bb01fa/photo_01_raw.jpg,640x480,640x480,False,10950,0,148.76356164383563,,,,"[0, 0, 0, 0]",WAITWIDTH,정답 없는 기존 실제 사진; 검출 수치만 기록,True
+results/signs_images/20261104_093555_889782_bb01fa/photo_02_raw.jpg,640x480,640x480,False,10840,1,148.68726937269372,,,,"[0, 0, 0, 0]",WAITWIDTH,정답 없는 기존 실제 사진; 검출 수치만 기록,True
+results/signs_images/20261104_093555_889782_bb01fa/photo_03_raw.jpg,640x480,640x480,False,10462,0,149.3740202638119,,,,"[0, 0, 0, 0]",WAITWIDTH,정답 없는 기존 실제 사진; 검출 수치만 기록,True
