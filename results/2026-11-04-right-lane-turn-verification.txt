@@ -1,0 +1,33 @@
+test_divider_gone_switches_after_min_time (__main__.ControllerTests.test_divider_gone_switches_after_min_time) ... ok
+test_divider_needs_consecutive_new_results (__main__.ControllerTests.test_divider_needs_consecutive_new_results) ... ok
+test_finishrun_stops_on_start_or_timeout (__main__.ControllerTests.test_finishrun_stops_on_start_or_timeout) ... ok
+test_frame_stale_and_lane_lost_stop (__main__.ControllerTests.test_frame_stale_and_lane_lost_stop) ... ok
+test_report_fields (__main__.ControllerTests.test_report_fields) ... ok
+test_rightlane_center_from_one_line (__main__.ControllerTests.test_rightlane_center_from_one_line) ... ok
+test_turnright_arc_and_exit_on_wide_lines (__main__.ControllerTests.test_turnright_arc_and_exit_on_wide_lines) ... ok
+test_turnright_timeout_and_lost (__main__.ControllerTests.test_turnright_timeout_and_lost) ... ok
+test_waitlane_follows_07_then_switches (__main__.ControllerTests.test_waitlane_follows_07_then_switches) ... ok
+test_waitlane_width_from_right_line_or_stop_without_yellow (__main__.ControllerTests.test_waitlane_width_from_right_line_or_stop_without_yellow) ... ok
+test_append_run (__main__.LoopTests.test_append_run) ... /Users/jeong-yeongbin/raspbot-pbl-3team/tools/test_right_lane_turn.py:345: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/0k/lggypmw14sg6pw4w6c8gfw680000gn/T/tmp_wuk8wgc/runs.csv' mode='r' encoding='utf-8'>
+  rows = list(csv.DictReader(path.open(encoding='utf-8')))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_check_mode_sends_no_motor_commands (__main__.LoopTests.test_check_mode_sends_no_motor_commands) ... 차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [39, 39, 31, 31], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
+ok
+test_drive_mode_reaches_finish_and_stops (__main__.LoopTests.test_drive_mode_reaches_finish_and_stops) ... 차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": null, "full_width": null, "width": 454.0, "center": 329.5, "speeds": [39, 39, 31, 31], "state": "WAITLANE", "stopped": false, "reason": "", "notes": []}
+차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": 332.5, "white": 0.0028, "right_width": 224.0, "full_width": 454.0, "width": 224.0, "center": 444.5, "speeds": [80, 80, 0, 0], "state": "RIGHTLANE", "stopped": false, "reason": "", "notes": []}
+차선 계산: {"left_count": 1080, "left": 102.5, "right_count": 1080, "right": 556.5, "divider": null, "white": 0.0, "right_width": 224.0, "full_width": 454.0, "width": 224.0, "center": 444.5, "speeds": [80, 80, 0, 0], "state": "TURNRIGHT", "stopped": false, "reason": "", "notes": []}
+ok
+test_analyze_and_annotated (__main__.VisionTests.test_analyze_and_annotated) ... ok
+test_arrow_blobs_rejected (__main__.VisionTests.test_arrow_blobs_rejected) ... ok
+test_divider_between_yellow_lines (__main__.VisionTests.test_divider_between_yellow_lines) ... ok
+test_divider_preferred_over_arrow_on_its_right (__main__.VisionTests.test_divider_preferred_over_arrow_on_its_right) ... ok
+test_floor_white_ratio (__main__.VisionTests.test_floor_white_ratio) ... ok
+test_slanted_divider_detected (__main__.VisionTests.test_slanted_divider_detected) ... ok
+test_white_island_and_start_marks_rejected (__main__.VisionTests.test_white_island_and_start_marks_rejected) ... ok
+test_yellow_fringe_is_not_white (__main__.VisionTests.test_yellow_fringe_is_not_white) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 3.911s
+
+OK
