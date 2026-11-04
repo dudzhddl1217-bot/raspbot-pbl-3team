@@ -12,3 +12,4 @@ Codex는 `AGENTS.md`(작업 수칙)를 따릅니다.
 ## 실행
 - 만든 프로그램: `python3 missions/01_persona.py` (번호는 지시서와 같음)
 - 키보드 조종: `python3 tools/teleop.py`
+- 조종판(브라우저에서 자동주행 ON · 긴급 정지 · 실시간 로그): `python3 missions/09_dashboard.py` → 같은 와이파이에서 `http://raspbot-03.local:8080` (지시서 `specs/09-dashboard.md`)

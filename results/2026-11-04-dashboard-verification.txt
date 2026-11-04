@@ -1,0 +1,24 @@
+test_picks_newest_after_start_and_ignores_runs (__main__.CsvTailTests.test_picks_newest_after_start_and_ignores_runs) ... ok
+test_page_status_and_rejections (__main__.HttpTests.test_page_status_and_rejections) ... ok
+test_preview_toggle_and_mjpeg (__main__.HttpTests.test_preview_toggle_and_mjpeg) ... ok
+test_start_events_files_and_estop (__main__.HttpTests.test_start_events_files_and_estop) ... ok
+test_multibyte_boundary_and_crlf (__main__.LineSplitterTests.test_multibyte_boundary_and_crlf) ... ok
+test_estop_and_zeros_when_idle (__main__.RunnerTests.test_estop_and_zeros_when_idle) ... ok
+test_estop_sigint_path (__main__.RunnerTests.test_estop_sigint_path) ... ok
+test_estop_sigkill_when_sigint_ignored (__main__.RunnerTests.test_estop_sigkill_when_sigint_ignored) ... ok
+test_preview_closed_before_start (__main__.RunnerTests.test_preview_closed_before_start) ... ok
+test_run_logs_rows_key_stop_and_zeros (__main__.RunnerTests.test_run_logs_rows_key_stop_and_zeros) ... ok
+test_second_start_rejected_and_zeros_rejected_while_running (__main__.RunnerTests.test_second_start_rejected_and_zeros_rejected_while_running) ... ok
+test_send_key_when_idle_is_error (__main__.RunnerTests.test_send_key_when_idle_is_error) ... ok
+test_shutdown_stops_running_program (__main__.RunnerTests.test_shutdown_stops_running_program) ... ok
+test_start_requires_confirmation_and_known_program (__main__.RunnerTests.test_start_requires_confirmation_and_known_program) ... ok
+test_watchdog_stops_after_max_seconds (__main__.RunnerTests.test_watchdog_stops_after_max_seconds) ... ok
+test_exit_text (__main__.ZerosTests.test_exit_text) ... ok
+test_i2c_error_output_is_reported (__main__.ZerosTests.test_i2c_error_output_is_reported) ... ok
+test_without_driver_is_skipped_safely (__main__.ZerosTests.test_without_driver_is_skipped_safely) ... ok
+test_zero_bundle_three_times (__main__.ZerosTests.test_zero_bundle_three_times) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 10.540s
+
+OK
