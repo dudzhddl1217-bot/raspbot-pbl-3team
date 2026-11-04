@@ -1,0 +1,90 @@
+{
+  "before_code_sha256": "232595dee2f98c5661c9f9db08bae08ed70251634c418cafc15198463e99dfa8",
+  "after_code_sha256": "f6b4c3ff418b890ef5aa5e905e731ec52690fe8976c9093a5da7be64b4bfda5a",
+  "definitions": "single_name_changes: 인접 단일선 행 이름 변경, 양선/미검출/미배정에서 연결 끊음. turn_ge70_rows: abs(L-R)>=70. 속도차 변화>10은 즉시정지 행 제외.",
+  "csv": [
+    {
+      "source": "camera_lane_20261104_184432_530537.csv",
+      "before": {
+        "rows": 1453,
+        "single_rows": 419,
+        "single_name_changes": 8,
+        "turn_ge70_rows": 81,
+        "difference_jump_gt10_rows": 169
+      },
+      "speed_limit_only": {
+        "rows": 1453,
+        "single_rows": 419,
+        "single_name_changes": null,
+        "turn_ge70_rows": 55,
+        "difference_jump_gt10_rows": 0
+      },
+      "originals_unchanged": true,
+      "original_sha256": "27b803336ff13e5ffc11eaf6729638dcc443a7f27643c986c144b83eedd249e2",
+      "limitation": "기울기·최하단 픽셀 없음. 수정 후 이름 변경 횟수는 계산 불가. after_single은 원본 이름 복사이며 새 검출이 아님."
+    },
+    {
+      "source": "camera_lane_20261104_183948_623953.csv",
+      "before": {
+        "rows": 4633,
+        "single_rows": 1509,
+        "single_name_changes": 12,
+        "turn_ge70_rows": 252,
+        "difference_jump_gt10_rows": 523
+      },
+      "speed_limit_only": {
+        "rows": 4633,
+        "single_rows": 1509,
+        "single_name_changes": null,
+        "turn_ge70_rows": 113,
+        "difference_jump_gt10_rows": 0
+      },
+      "originals_unchanged": true,
+      "original_sha256": "2ba17f90a80ae44dfc63ca95a88b312c0a6051df8a6237fbb263b372a059b35f",
+      "limitation": "기울기·최하단 픽셀 없음. 수정 후 이름 변경 횟수는 계산 불가. after_single은 원본 이름 복사이며 새 검출이 아님."
+    }
+  ],
+  "photos": [
+    {
+      "session": "slow_174248",
+      "before": {
+        "rows": 360,
+        "single_rows": 142,
+        "single_name_changes": 2,
+        "turn_ge70_rows": 39,
+        "difference_jump_gt10_rows": 55
+      },
+      "after": {
+        "rows": 360,
+        "single_rows": 143,
+        "single_name_changes": 1,
+        "turn_ge70_rows": 13,
+        "difference_jump_gt10_rows": 0
+      },
+      "original_sha256": "6dbf0ee74d3a9426560b19da4054d2a5e4523a6e0ff9fe86d8fa92b67ce0c324",
+      "originals_unchanged": true
+    },
+    {
+      "session": "slow2_174610",
+      "before": {
+        "rows": 180,
+        "single_rows": 29,
+        "single_name_changes": 0,
+        "turn_ge70_rows": 9,
+        "difference_jump_gt10_rows": 6
+      },
+      "after": {
+        "rows": 180,
+        "single_rows": 24,
+        "single_name_changes": 0,
+        "turn_ge70_rows": 0,
+        "difference_jump_gt10_rows": 0
+      },
+      "original_sha256": "ea9aee22fca0ec0f28e71cf573ad3c7cf4882c770207c9d455a72b247cdc7681",
+      "originals_unchanged": true
+    }
+  ],
+  "limitation": "사진은 별도 세션·정답 없음. 정지 래치와 시각 조건을 해제한 전체 프레임 진단이며 실제 주행/정지시간 검증 아님. 새 움직임에 따른 영상 변화 재현 불가.",
+  "hardware_used": false,
+  "images_copied_or_saved": false
+}

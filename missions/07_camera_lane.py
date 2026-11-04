@@ -2,11 +2,14 @@
 # 지시서: specs/07-camera-lane.md
 """노란 차선 비례 조향. --check는 드라이버를 불러오거나 모터 명령을 보내지 않는다."""
 import argparse
+from collections import deque
+from contextlib import contextmanager
 import csv
 from datetime import datetime
 import importlib.util
 import json
 from pathlib import Path
+import signal
 import sys
 import threading
 import time
@@ -31,22 +34,85 @@ STOP = (0, 0, 0, 0)
 KST = ZoneInfo('Asia/Seoul')
 ROI_TOP, ROI_BOTTOM = 120, 300
 BASE_SPEED = 35
-STEERING_K = 0.4
+STEERING_K = 0.3
 MAX_SPEED = 80
 SEARCH_SECONDS = 1.0
 
 
-def find_lines(frame):
+class Component(tuple):
+    """기존 (평균x, 점수) 표현에 실제 연결 점들을 보관한다."""
+    def __new__(cls, xs, ys):
+        obj = super().__new__(cls, (float(xs.mean()), len(xs)))
+        obj.xs, obj.ys = xs, ys
+        return obj
+
+
+def find_components(frame):
     if frame is None or frame.shape != (480, 640, 3) or frame.dtype != np.uint8:
         raise ValueError('차선 입력 화면은 640x480 uint8 BGR이어야 합니다.')
     hsv = cv2.cvtColor(frame[ROI_TOP:ROI_BOTTOM], cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, (15, 80, 100), (40, 255, 255))
-    result = {}
-    for name, start, end in (('left', 0, 320), ('right', 320, 640)):
-        _, xs = np.nonzero(mask[:, start:end])
-        result[name + '_count'] = len(xs)
-        result[name] = float(xs.mean() + start) if len(xs) >= 50 else None
+    count, labels, stats, centers = cv2.connectedComponentsWithStats(mask, connectivity=8)
+    selected = sorted((i for i in range(1, count) if stats[i, cv2.CC_STAT_AREA] >= 50),
+                      key=lambda i: (-stats[i, cv2.CC_STAT_AREA], centers[i, 0]))[:2]
+    parts = []
+    for i in selected:
+        ys, xs = np.nonzero(labels == i)
+        parts.append(Component(xs, ys))
+    return parts
+
+
+def assign_lines(components, previous=None, width=None, last_name=None):
+    result = dict(left=None, right=None, left_count=0, right_count=0)
+    parts = sorted(components, key=lambda c: c[0])
+    if len(parts) == 2 and parts[1][0] - parts[0][0] < 300:
+        if all(isinstance(c, Component) for c in parts):
+            parts = [Component(np.concatenate([c.xs for c in parts]),
+                               np.concatenate([c.ys for c in parts]))]
+        else:
+            total = sum(c[1] for c in parts)
+            parts = [(sum(x*n for x,n in parts)/total, total)]
+    if not parts:
+        return result
+    if len(parts) == 2:
+        assigned = zip(('left', 'right'), parts)
+    elif isinstance(parts[0], Component):
+        part = parts[0]
+        xs, ys = part.xs, part.ys
+        name = last_name
+        if np.ptp(xs)+1 < 3*(np.ptp(ys)+1):
+            dx, dy = xs-xs.mean(), ys-ys.mean()
+            slope = float(np.dot(dx, dy) / np.dot(dy, dy)) if np.dot(dy, dy) else 0.
+            if slope < 0:
+                name = 'left'
+            elif slope > 0:
+                name = 'right'
+        if name is None:
+            return dict(result, unassigned=True)
+        assigned = [(name, (float(xs[ys == ys.max()].mean()), part[1]))]
+    elif previous is None:
+        # 원본 픽셀이 없는 저장 좌표를 쓰는 오프라인 검증 호환 경로.
+        return dict(result, unassigned=True)
+    else:
+        x, _ = parts[0]
+        name = min(('left', 'right'), key=lambda name: abs(x-previous[name]))
+        assigned = [(name, parts[0])]
+    for name, (x, area) in assigned:
+        result[name], result[name+'_count'] = x, area
     return result
+
+
+def find_lines(frame, previous=None, width=None, last_name=None):
+    return assign_lines(find_components(frame), previous, width, last_name)
+
+
+def limit_difference(target, previous):
+    old = previous[0] - previous[2]
+    difference = max(old-10, min(old+10, target[0]-target[2]))
+    left = max(max(0, difference), min(min(MAX_SPEED, MAX_SPEED+difference),
+               round((target[0]+target[2]+difference)/2)))
+    right = left-difference
+    return (left, left, right, right)
 
 
 def wheel_speeds(center):
@@ -59,8 +125,12 @@ def wheel_speeds(center):
 class LaneController:
     """장치 없이 선 위치·시간으로 바퀴 값을 계산한다."""
     def __init__(self):
+        self.single_name = None
         self.width = None
+        self.previous = None
         self.center = None
+        self.raw_center = None
+        self.centers = deque(maxlen=3)
         self.last_frame = None
         self.lost_since = None
         self.last_turn = None
@@ -87,8 +157,26 @@ class LaneController:
         if self.stopped:
             return STOP
         self.last_frame = now
+        # 직접 입력된 두 후보도 같은 규칙으로 정리한다.
+        if lines['left'] is not None and lines['right'] is not None:
+            lines = assign_lines([(lines[name], lines[name+'_count']) for name in ('left','right')],
+                                 self.previous, self.width)
         self.lines = dict(lines)
+        self.raw_center = None
         left, right = lines['left'], lines['right']
+        if (left is None) != (right is None):
+            self.single_name = 'left' if left is not None else 'right'
+        if lines.get('unassigned'):
+            self.state = 'WAITWIDTH'
+            self.center = None
+            self.speeds = STOP
+            return STOP
+        if left is not None and right is not None and self.previous is None:
+            self.previous = dict(left=left, right=right)
+        elif self.previous is not None:
+            for name in ('left', 'right'):
+                if lines[name] is not None:
+                    self.previous[name] = lines[name]
         if left is None and right is None:
             if self.lost_since is None:
                 self.lost_since = now
@@ -99,11 +187,13 @@ class LaneController:
                 self.speeds = STOP
             else:
                 self.state = 'SEARCH' + self.last_turn
-                self.speeds = (60, 60, 0, 0) if self.last_turn == 'RIGHT' else (0, 0, 60, 60)
+                target = (60, 60, 0, 0) if self.last_turn == 'RIGHT' else (0, 0, 60, 60)
+                self.speeds = limit_difference(target, self.speeds)
             return self.speeds
         self.lost_since = None
         if left is not None and right is not None:
-            self.width = right - left
+            if 300 <= right - left <= 600:
+                self.width = right - left
             self.center = (left + right) / 2
             self.state = 'TRACKBOTH'
         elif self.width is None:
@@ -117,7 +207,10 @@ class LaneController:
         else:
             self.center = right - self.width / 2
             self.state = 'TRACKRIGHT'
-        self.speeds = wheel_speeds(self.center)
+        self.raw_center = max(0., min(640., self.center))
+        self.centers.append(self.raw_center)
+        self.center = sum(self.centers) / len(self.centers)
+        self.speeds = limit_difference(wheel_speeds(self.center), self.speeds)
         if self.speeds[0] > self.speeds[2]:
             self.last_turn = 'RIGHT'
         elif self.speeds[0] < self.speeds[2]:
@@ -126,7 +219,7 @@ class LaneController:
 
     def report(self):
         return dict(self.lines, width=self.width, center=self.center,
-                    speeds=self.speeds, state=self.state, stopped=self.stopped, last_turn=self.last_turn)
+                    raw_center=self.raw_center, speeds=self.speeds, state=self.state, stopped=self.stopped, last_turn=self.last_turn)
 
 
 def annotated(frame, report):
@@ -173,7 +266,7 @@ class LaneVideo(video.BlackboxRecorder):
         super().__init__(source)
         self.stop = threading.Event()
         self.error = None
-        self.thread = threading.Thread(target=self.run, name='lane-video', daemon=True)
+        self.thread = threading.Thread(target=self.run, name='lane-video')
 
     def run(self):
         writer = None
@@ -211,20 +304,18 @@ class LaneVideo(video.BlackboxRecorder):
     def close(self):
         self.stop.set()
         if self.thread.ident is not None:
-            self.thread.join(timeout=2)
-        if self.thread.is_alive():
-            raise RuntimeError('차선 녹화 종료 응답 없음')
+            self.thread.join()
         self.check()
 
 
 FIELDS = ('경과초','화면순번','상태','왼쪽선_x','오른쪽선_x','왼쪽노란점개수','오른쪽노란점개수',
-          '차선폭_px','차선중심_x','바퀴값','모드')
+          '차선폭_px','차선중심_x','바퀴값','모드','평균전중심_x')
 
 
 def row_values(report, elapsed, sequence, check):
     return dict(zip(FIELDS,(round(elapsed,4),sequence,report['state'],report['left'],report['right'],
                             report['left_count'],report['right_count'],report['width'],report['center'],
-                            json.dumps(report['speeds']), '읽기전용' if check else '주행')))
+                            json.dumps(report['speeds']), '읽기전용' if check else '주행', report['raw_center'])))
 
 
 def run_loop(camera, recorder, display, key_pressed, stream, check=False, bot=None):
@@ -248,7 +339,7 @@ def run_loop(camera, recorder, display, key_pressed, stream, check=False, bot=No
             candidate, new_sequence = camera.snapshot()
             received_at = time.monotonic()
             if new_sequence != sequence:
-                lines = find_lines(candidate)
+                lines = find_lines(candidate, controller.previous, controller.width, controller.single_name)
                 # 선 찾기가 늦어진 경우에도 경과 시간 한계를 먼저 확인한다.
                 now = time.monotonic()
                 controller.update(lines, received_at)
@@ -283,7 +374,7 @@ def run_loop(camera, recorder, display, key_pressed, stream, check=False, bot=No
     return reason, controller.report()
 
 
-def main():
+def _main(stop_requested):
     parser = argparse.ArgumentParser(description='노란 차선 주행 / --check는 모터 명령 없는 카메라 점검')
     parser.add_argument('--check',action='store_true',help='모터 없이 선과 바퀴 계산 값을 1초마다 출력')
     args = parser.parse_args()
@@ -294,13 +385,16 @@ def main():
     path.parent.mkdir(parents=True,exist_ok=True)
     display = LatestDisplay()
     try:
-        with line.keyboard_stop() as key_pressed:
+        with line.keyboard_stop() as terminal_key:
+            key_pressed = lambda: stop_requested.is_set() or terminal_key()
             if not args.check:
                 from Raspbot_Lib import Raspbot
                 bot = Raspbot()
                 line.stop_all(bot)
             camera = video.LatestCamera()
             camera.start()
+            if stop_requested.is_set():
+                return
             first, _ = camera.snapshot()
             display.update(first,LaneController().report())
             recorder = LaneVideo(display)
@@ -324,6 +418,26 @@ def main():
                     errors.append(exc)
         if errors:
             raise RuntimeError('차선 종료 정리 오류: '+'; '.join(map(str,errors)))
+
+
+@contextmanager
+def stop_signals():
+    requested = threading.Event()
+    previous = signal.getsignal(signal.SIGINT)
+    signal.signal(signal.SIGINT, lambda signum, frame: requested.set())
+    try:
+        yield requested
+    finally:
+        signal.signal(signal.SIGINT, previous)
+
+
+def main():
+    with stop_signals() as requested:
+        try:
+            _main(requested)
+        except KeyboardInterrupt:
+            # 시작 준비 중 중단도 _main의 정리 이후 조용히 끝낸다.
+            pass
 
 
 if __name__ == '__main__':
